@@ -33,7 +33,7 @@ if (process.env.REDIS_URL) {
 bot.init(redis, io, requestify);
 //shop.init(redis, requestify);
 var ports = process.env.PORT || 5000;
-server.listen(44313, '178.62.24.199');
+server.listen(ports, '0.0.0.0');
 
 console.log('Server started on ' + config.domain + ':' + ports);
 
