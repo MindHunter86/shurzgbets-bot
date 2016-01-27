@@ -87,10 +87,12 @@ steamClient.on('logOnResponse', function(logonResp) {
         steamFriends.setPersonaState(Steam.EPersonaState.Online);
 
         steamWebLogOn.webLogOn(function(sessionID, newCookie) {
+            console.log('steamWebLogOn');
             getSteamAPIKey({
                 sessionID: sessionID,
                 webCookie: newCookie
             }, function(err, APIKey) {
+                console.log('getSteamAPIKey');
                 if(err) {
                     steamBotLogger(err);
                 }
