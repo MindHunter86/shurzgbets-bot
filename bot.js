@@ -7,6 +7,7 @@ var SteamWebLogOn = require('steam-weblogon');
 var getSteamAPIKey = require('steam-web-api-key');
 var SteamTradeOffers = require('steam-tradeoffers');
 var SteamTotp = require('steam-totp');
+var SteamCommunity = require('steamcommunity');
 var domain = require('domain');
 var redisClient, io, requestify;
 module.exports.init = function(redis, ioSocket, requestifyCore) {
@@ -112,6 +113,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                     });
                     redisClient.del(redisChannels.usersQueue);
                     //redisClient.del(redisChannels.checkList);
+                    SteamCommunity.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
                     steamBotLogger('Setup Offers!');
                 });
 
@@ -413,6 +415,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                         setPrizeStatus(game, 1);
                         sendProcceed = false;
                     });
+                    //SteamCommunity.checkConfirmations();
                     console.tag('SteamBot', 'SendPrize').log('TradeOffer #' + response.tradeofferid +' send!');
                 });
             }else{
