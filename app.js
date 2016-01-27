@@ -9,7 +9,7 @@ var auth = require('http-auth'),
     console = process.console,
     config  = require('./config/config.js'),
     app     = require('express')(),
-    server  = require('http').createServer(app),
+    server  = require('http').Server(app),
     io      = require('socket.io')(server),
     redis   = require('redis'),
     requestify   = require('requestify'),
@@ -33,7 +33,7 @@ if (process.env.REDIS_URL) {
 bot.init(redis, io, requestify);
 //shop.init(redis, requestify);
 
-//server.listen(config.serverPort, "127.0.0.1");
+server.listen(config.serverPort);
 
 console.log('Server started on ' + config.domain + ':' + config.serverPort);
 
