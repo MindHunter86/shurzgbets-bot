@@ -193,22 +193,30 @@ function handleOffers() {
                         offers.declineOffer({tradeOfferId: offer.tradeofferid});
                         return;
                     }
-                    if (offer.items_to_receive != null && offer.items_to_give == null) {
-                        checkingOffers.push(offer.tradeofferid);
-                        var end = new Date();
-                        console.log('Скорость ' + (end.getTime()-start.getTime()) + ' мс');
-                        console.tag('SteamBot', 'TradeOffer').log('TRADE OFFER #' + offer.tradeofferid + ' FROM: ' + offer.steamid_other);
-                        redisClient.multi([
-                            ['rpush', redisChannels.tradeoffersList, offer.tradeofferid],
-                            ['rpush', redisChannels.checkItemsList, JSON.stringify(offer)],
-                            ['rpush', redisChannels.usersQueue, offer.steamid_other]
-                        ]).exec(function(){
-                            redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                addQueue(queues, queues.length);
+                    self.offers.getTradeHoldDuration({
+                        tradeOfferId: offer.tradeofferid
+                    }, function(err, response) {
+                        if(err) {
+                            offers.declineOffer({tradeOfferId: offer.tradeofferid}); //ESCROW не подключен
+                            return;
+                        }
+                        if (offer.items_to_receive != null && offer.items_to_give == null) {
+                            checkingOffers.push(offer.tradeofferid);
+                            var end = new Date();
+                            console.log('Скорость ' + (end.getTime()-start.getTime()) + ' мс');
+                            console.tag('SteamBot', 'TradeOffer').log('TRADE OFFER #' + offer.tradeofferid + ' FROM: ' + offer.steamid_other);
+                            redisClient.multi([
+                                ['rpush', redisChannels.tradeoffersList, offer.tradeofferid],
+                                ['rpush', redisChannels.checkItemsList, JSON.stringify(offer)],
+                                ['rpush', redisChannels.usersQueue, offer.steamid_other]
+                            ]).exec(function(){
+                                redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
+                                    addQueue(queues, queues.length);
+                                });
                             });
-                        });
-                        return;
-                    }
+                            return;
+                        }
+                    });
                 }
             });
         }
