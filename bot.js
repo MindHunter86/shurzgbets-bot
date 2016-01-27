@@ -193,7 +193,7 @@ function handleOffers() {
                         offers.declineOffer({tradeOfferId: offer.tradeofferid});
                         return;
                     }
-                    self.offers.getTradeHoldDuration({
+                    offers.getTradeHoldDuration({
                         tradeOfferId: offer.tradeofferid
                     }, function(err, response) {
                         if(err) {
