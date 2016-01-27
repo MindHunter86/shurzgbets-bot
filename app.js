@@ -32,10 +32,10 @@ if (process.env.REDIS_URL) {
 
 bot.init(redis, io, requestify);
 //shop.init(redis, requestify);
+var ports = process.env.PORT || 5000;
+server.listen(ports);
 
-server.listen(process.env.PORT || 5000);
-
-console.log('Server started on ' + config.domain + ':' + process.env.PORT || 5000);
+console.log('Server started on ' + config.domain + ':' + ports);
 
 var basicAuth = auth.basic({ //basic auth config
     realm: "WebPanel",
