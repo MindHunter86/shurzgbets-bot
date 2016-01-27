@@ -6,6 +6,7 @@ var Steam = require('steam');
 var SteamWebLogOn = require('steam-weblogon');
 var getSteamAPIKey = require('steam-web-api-key');
 var SteamTradeOffers = require('steam-tradeoffers');
+var SteamTotp = require('steam-totp');
 var domain = require('domain');
 var redisClient, io, requestify;
 module.exports.init = function(redis, ioSocket, requestifyCore) {
@@ -32,6 +33,7 @@ var authCode = ''; // code received by email
 
 try {
     logOnOptions.sha_sentryfile = getSHA1(fs.readFileSync('bots/ssfn2616591384358764314'));
+    logOnOptions.two_factor_code = SteamTotp.getAuthCode('I5LkMaIt5+jFwG24wuC21R4SVbk=');
 } catch (e) {
     if (authCode !== '') {
         logOnOptions.auth_code = authCode;
