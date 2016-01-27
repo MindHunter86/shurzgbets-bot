@@ -100,25 +100,20 @@ steamClient.on('logOnResponse', function(logonResp) {
                     sessionID: sessionID,
                     webCookie: newCookie,
                     APIKey: APIKey
-                }, function(err){
-                    console.log(APIKey);
-                    if(err) {
-                        steamBotLogger(err);
-                    }
-                    WebSession = true;
-                    globalSession = sessionID;
-                    redisClient.lrange(redisChannels.tradeoffersList, 0, -1, function(err, offers){
-                        offers.forEach(function(offer) {
-                            checkingOffers.push(offer);
-                        });
-                        handleOffers();
-                    });
-                    redisClient.del(redisChannels.usersQueue);
-                    //redisClient.del(redisChannels.checkList);
-                    SteamCommunity.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
-                    steamBotLogger('Setup Offers!');
                 });
-
+                console.log(APIKey);
+                WebSession = true;
+                globalSession = sessionID;
+                redisClient.lrange(redisChannels.tradeoffersList, 0, -1, function(err, offers){
+                    offers.forEach(function(offer) {
+                        checkingOffers.push(offer);
+                    });
+                    handleOffers();
+                });
+                redisClient.del(redisChannels.usersQueue);
+                //redisClient.del(redisChannels.checkList);
+                SteamCommunity.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
+                steamBotLogger('Setup Offers!');
             });
         });
     }
