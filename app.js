@@ -9,7 +9,7 @@ var auth = require('http-auth'),
     console = process.console,
     config  = require('./config/config.js'),
     app     = require('express')(),
-    server  = require('http').Server(app),
+    server  = require('http').createServer(app),
     io      = require('socket.io')(server),
     redis   = require('redis'),
     requestify   = require('requestify'),
@@ -35,7 +35,7 @@ bot.init(redis, io, requestify);
 
 server.listen(process.env.PORT);
 
-console.log('Server started on ' + config.domain + ':' + config.serverPort);
+console.log('Server started on ' + config.domain + ':' + process.env.PORT);
 
 var basicAuth = auth.basic({ //basic auth config
     realm: "WebPanel",
