@@ -33,7 +33,7 @@ if (process.env.REDIS_URL) {
 bot.init(redis, io, requestify);
 //shop.init(redis, requestify);
 var ports = process.env.PORT || 5000;
-server.listen(ports);
+server.listen(ports, 'node.itemup.ru');
 
 console.log('Server started on ' + config.domain + ':' + ports);
 
