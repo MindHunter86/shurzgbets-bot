@@ -8,6 +8,8 @@ var getSteamAPIKey = require('steam-web-api-key');
 var SteamTradeOffers = require('steam-tradeoffers');
 var SteamTotp = require('steam-totp');
 var SteamCommunity = require('steamcommunity');
+var confirmations = new SteamCommunity();
+
 var domain = require('domain');
 var redisClient, io, requestify;
 module.exports.init = function(redis, ioSocket, requestifyCore) {
@@ -112,7 +114,8 @@ steamClient.on('logOnResponse', function(logonResp) {
                 });
                 redisClient.del(redisChannels.usersQueue);
                 //redisClient.del(redisChannels.checkList);
-                SteamCommunity.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
+                confirmations.setCookies(newCookie);
+                confirmations.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
                 steamBotLogger('Setup Offers!');
             });
         });
