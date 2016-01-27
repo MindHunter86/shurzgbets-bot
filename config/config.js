@@ -3,7 +3,7 @@ Config file
  */
 
 var config = {
-    serverPort: 44314,
+    serverPort: 80,
     prefix: '',
 	//настройка бота рулетки
     bot: {
