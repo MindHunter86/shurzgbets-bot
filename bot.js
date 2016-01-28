@@ -175,6 +175,8 @@ function handleOffers() {
         active_only: 1,
         time_historical_cutoff: Math.round(Date.now() / 1000)
     }, function(error, body) {
+        if(error) 
+            console.log(error);
         if (
             body
             && body.response
