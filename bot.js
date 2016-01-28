@@ -172,8 +172,7 @@ function handleOffers() {
     var start = new Date();
     offers.getOffers({
         get_received_offers: 1,
-        active_only: 1,
-        time_historical_cutoff: Math.round(Date.now() / 1000)
+        active_only: 1
     }, function(error, body) {
         if(error) 
             console.log(error);
