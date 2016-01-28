@@ -190,6 +190,7 @@ function handleOffers() {
                         return;
                     }
                     if(offer.items_to_give != null) {
+                        console.log('no items to give');
                         offers.declineOffer({tradeOfferId: offer.tradeofferid});
                         return;
                     }
@@ -197,6 +198,7 @@ function handleOffers() {
                         tradeOfferId: offer.tradeofferid
                     }, function(err, response) {
                         if(err) {
+                            console.log('escrow disable decline offer');
                             offers.declineOffer({tradeOfferId: offer.tradeofferid}); //ESCROW не подключен
                             return;
                         }
