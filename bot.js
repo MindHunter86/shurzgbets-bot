@@ -198,7 +198,7 @@ function handleOffers() {
                     offers.getTradeHoldDuration({
                         tradeOfferId: offer.tradeofferid
                     }, function(err, response) {
-                        if(err) {
+                        if(response.their != 0)
                             console.log('escrow disable decline offer');
                             offers.declineOffer({tradeOfferId: offer.tradeofferid}); //ESCROW не подключен
                             return;
