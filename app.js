@@ -90,8 +90,8 @@ var steamStatus = [],
     timer,
     ngtimer,
     timerStatus = false,
-    timerTime = 180,
-    preFinishingTime = 10;
+    timerTime = 60,
+    preFinishingTime = 5;
 
 getCurrentGame();
 //checkSteamInventoryStatus();
@@ -121,13 +121,13 @@ function startTimer(){
 }
 
 function startNGTimer(winners){
-    var time = 30;
+    var time = 20;
     data = JSON.parse(winners);
     data.showSlider = true;
     clearInterval(ngtimer);
     ngtimer = setInterval(function(){
         bot.delayForNewGame(true);
-        if(time <= 15) data.showSlider = false;
+        if(time <= 10) data.showSlider = false;
         console.tag('Game').log('NewGame Timer:' + time);
         data.time = time--;
         io.sockets.emit('slider', data);
