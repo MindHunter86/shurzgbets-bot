@@ -125,7 +125,9 @@ steamClient.on('logOnResponse', function(logonResp) {
 steamClient.on('servers', function(servers) {
     fs.writeFile('./config/servers', JSON.stringify(servers));
 });
-
+steamClient.on('error', function(error) {
+    console.log(error);
+});
 steamUser.on('updateMachineAuth', function(sentry, callback) {
     fs.writeFileSync('sentry', sentry.bytes);
     callback({ sha_file: getSHA1(sentry.bytes) });
