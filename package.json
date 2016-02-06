@@ -18,13 +18,12 @@
     "steam-weblogon": "^0.0.4",
     "steam-tradeoffers": "^3.0.1",
     "steam-totp": "^1.3.0",
-    "steamcommunity": "^3.18.5",
-    "forever": "^0.15.1"
+    "steamcommunity": "^3.18.5"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "forever start app.js"
+    "start": "node app.js"
   },
   "engines": {
     "node": "4.1.1"
