@@ -165,6 +165,14 @@ function newGame(){
             io.sockets.emit('newGame', game);
             bot.handleOffers();
             preFinish = false;
+            requestify.post('http://'+config.domain+'/api/bonusBet', {
+                secretKey: config.secretKey
+            })
+            .then(function(response) {
+                console.log('bonus');
+            }, function(response) {
+                console.log('error bonus');
+            });
         },function(response){
             console.tag('Game').error('Something wrong [newGame]');
             setTimeout(newGame, 1000);
