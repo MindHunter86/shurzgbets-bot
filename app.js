@@ -90,8 +90,8 @@ var steamStatus = [],
     timer,
     ngtimer,
     timerStatus = false,
-    timerTime = 60,
-    preFinishingTime = 5;
+    timerTime = 90,
+    preFinishingTime = 2;
 
 getCurrentGame();
 //checkSteamInventoryStatus();
@@ -121,7 +121,7 @@ function startTimer(){
 }
 
 function startNGTimer(winners){
-    var time = 20;
+    var time = 15;
     data = JSON.parse(winners);
     data.showSlider = true;
     clearInterval(ngtimer);
