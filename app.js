@@ -173,6 +173,7 @@ function newGame(){
             }, function(response) {
                 console.log('error bonus');
             });
+            redisClient.del('usersQueue.list');
         },function(response){
             console.tag('Game').error('Something wrong [newGame]');
             setTimeout(newGame, 1000);
