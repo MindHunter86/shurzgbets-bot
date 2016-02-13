@@ -352,6 +352,7 @@ var queueProceed = function(){
         }
     });
     redisClient.llen(redisChannels.itemsToGive, function(err, length) {
+        console.tag('SteamBotShop').log('itemstogive');
         if (length > 0 && !sendProcceed && WebSession) {
             console.tag('SteamBotShop','Queues').info('Send items:' + length);
             sendProcceed = true;
@@ -361,6 +362,7 @@ var queueProceed = function(){
         }
     });
     redisClient.llen(redisChannels.offersToCheck, function(err, length) {
+        console.tag('SteamBotShop').log('offersToCheck');
         if (length > 0 && !checkProcceed && WebSession) {
             console.tag('SteamBotShop','Queues').info('Check Offers:' + length);
             checkProcceed = true;
