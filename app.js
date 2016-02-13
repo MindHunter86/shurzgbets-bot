@@ -14,7 +14,7 @@ var auth = require('http-auth'),
     redis   = require('redis'),
     requestify   = require('requestify'),
     bot     = require('./bot.js');
-    //shop     = require('./shop.js');
+    shop     = require('./shop.js');
 
 if (process.env.REDIS_URL) {
     var redisUrl    = require('url').parse(process.env.REDIS_URL);
@@ -31,7 +31,7 @@ if (process.env.REDIS_URL) {
 }
 
 bot.init(redis, io, requestify);
-//shop.init(redis, requestify);
+shop.init(redis, requestify);
 var ports = process.env.PORT || 5000;
 server.listen(5000);
 

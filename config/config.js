@@ -12,8 +12,8 @@ var config = {
     },
 	//настройки бота магазина
     shopBot: {
-        username: 'lexx_nightwolf',
-        password: '3kAp2SNyFejf3rR',
+        username: 'dotal_1',
+        password: 'QmjKTHvO',
         timeForCancelOffer: 1800
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
