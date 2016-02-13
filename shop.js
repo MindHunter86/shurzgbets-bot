@@ -145,11 +145,18 @@ function handleOffers() {
                                                     i = 0;
                                                     botItems.forEach(function(item){
                                                         if(itemsForParse.indexOf(item.id) != -1){
-                                                            var type = item.tags[0].name;
-                                                            var rarity;
-                                                            var quality;
-
-                                                            if(type === 'Sticker') { 
+                                                            //var type = item.tags[0].name;
+                                                            //var rarity;
+                                                            //var quality;
+                                                            var rarity = '', type = '';
+                                                            var arr = item.type.split(',');
+                                                            if (arr.length == 2) rarity = arr[1].trim();
+                                                            if (arr.length == 3) rarity = arr[2].trim();
+                                                            if (arr.length && arr[0] == 'Knife') rarity = 'Тайное';
+                                                            if (arr.length) type = arr[0];
+                                                            var quality = item.market_name.match(/\(([^()]*)\)/);
+                                                            if(quality != null && quality.length == 2) quality = quality[1];
+                                                            /*if(type === 'Sticker') { 
                                                                 rarity = item.tags[2].name;
                                                                 quality = item.tags[1].name;
                                                             }
@@ -164,7 +171,7 @@ function handleOffers() {
                                                             else {
                                                                 rarity = item.tags[4].name;
                                                                 quality = item.tags[5].name;
-                                                            }
+                                                            }*/
                                                             itemsForSale[i++] = {
                                                                 inventoryId: item.id,
                                                                 classId: item.classid,
