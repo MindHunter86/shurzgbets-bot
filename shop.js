@@ -7,6 +7,7 @@ var SteamWebLogOn = require('steam-weblogon');
 var getSteamAPIKey = require('steam-web-api-key');
 var SteamTradeOffers = require('steam-tradeoffers');
 var domain = require('domain');
+var SteamTotp = require('steam-totp');
 var SteamCommunity = require('steamcommunity');
 var confirmations = new SteamCommunity();
 
