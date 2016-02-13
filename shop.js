@@ -34,7 +34,7 @@ var logOnOptions = {
 var authCode = ''; // code received by email
 
 try {
-    logOnOptions.sha_sentryfile = getSHA1(fs.readFileSync('bots/dotal_1'));
+    logOnOptions.sha_sentryfile = getSHA1(fs.readFileSync('bots/ssfn2616591384358764314'));
     logOnOptions.two_factor_code = SteamTotp.getAuthCode('9dXb6372nKsXCc/7XgjxKEv2ejk=');
 } catch (e) {
     if (authCode !== '') {
@@ -87,22 +87,20 @@ steamClient.on('logOnResponse', function(logonResp) {
                     sessionID: sessionID,
                     webCookie: newCookie,
                     APIKey: APIKey
-                }, function(err){
-                    WebSession = true;
-                    globalSession = sessionID;
-                    redisClient.lrange(redisChannels.tradeoffersList, 0, -1, function(err, offers){
-                        offers.forEach(function(offer) {
-                            checkingOffers.push(offer);
-                        });
-                        handleOffers();
-                    });
-                    redisClient.del(redisChannels.itemsToGive);
-                    redisClient.del(redisChannels.offersToCheck);
-                    confirmations.setCookies(newCookie);
-                    confirmations.startConfirmationChecker(10000, 'LCDy7k8u2Dz5YzwdgyjvWeuwR/0=');
-                    steamBotLogger('Setup Offers!');
                 });
-
+                WebSession = true;
+                globalSession = sessionID;
+                redisClient.lrange(redisChannels.tradeoffersList, 0, -1, function(err, offers){
+                    offers.forEach(function(offer) {
+                        checkingOffers.push(offer);
+                    });
+                    handleOffers();
+                });
+                redisClient.del(redisChannels.itemsToGive);
+                redisClient.del(redisChannels.offersToCheck);
+                confirmations.setCookies(newCookie);
+                confirmations.startConfirmationChecker(10000, 'LCDy7k8u2Dz5YzwdgyjvWeuwR/0=');
+                steamBotLogger('Setup Offers!');
             });
         });
     }
@@ -352,7 +350,6 @@ var queueProceed = function(){
         }
     });
     redisClient.llen(redisChannels.itemsToGive, function(err, length) {
-        console.tag('SteamBotShop').log('itemstogive');
         if (length > 0 && !sendProcceed && WebSession) {
             console.tag('SteamBotShop','Queues').info('Send items:' + length);
             sendProcceed = true;
@@ -362,7 +359,6 @@ var queueProceed = function(){
         }
     });
     redisClient.llen(redisChannels.offersToCheck, function(err, length) {
-        console.tag('SteamBotShop').log('offersToCheck');
         if (length > 0 && !checkProcceed && WebSession) {
             console.tag('SteamBotShop','Queues').info('Check Offers:' + length);
             checkProcceed = true;
