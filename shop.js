@@ -34,7 +34,7 @@ var logOnOptions = {
 var authCode = ''; // code received by email
 
 try {
-    logOnOptions.sha_sentryfile = getSHA1(fs.readFileSync('bots/ssfn2616591384358764314'));
+    logOnOptions.sha_sentryfile = getSHA1(fs.readFileSync('bots/dotal_1'));
     logOnOptions.two_factor_code = SteamTotp.getAuthCode('9dXb6372nKsXCc/7XgjxKEv2ejk=');
 } catch (e) {
     if (authCode !== '') {
