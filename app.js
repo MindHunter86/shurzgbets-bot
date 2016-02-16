@@ -215,7 +215,7 @@ function showSliderWinnersLottery(){
             console.tag('Lottery').log('Show slider!');
         },function(response){
             console.tag('Lottery').error('Something wrong [showSlider]');
-            setTimeout(showSliderWinners, 1000);
+            setTimeout(showSliderWinnersLottery, 1000);
         });
 }
 function showSliderWinners(){
