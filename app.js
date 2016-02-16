@@ -60,6 +60,10 @@ redisClient.on("message", function(channel, message) {
         game.status = 3;
         showSliderWinners();
     }
+    if(channel == 'show.lottery.winners') {
+        console.log('Start Winner Lottery');
+        showSliderWinnersLottery();
+    }
     if(channel == config.prefix + 'newDeposit'){
         io.sockets.emit(channel, message);
 
@@ -90,7 +94,7 @@ var steamStatus = [],
     timer,
     ngtimer,
     timerStatus = false,
-    timerTime = 90,
+    timerTime = 120,
     preFinishingTime = 2;
 
 getCurrentGame();
@@ -154,7 +158,21 @@ function getCurrentGame(){
             setTimeout(getCurrentGame, 1000);
         });
 }
-
+function newLottery(){
+    requestify.post('http://'+config.domain+'/api/newLottery', {
+        secretKey: config.secretKey
+    })
+        .then(function(response) {
+            game = JSON.parse(response.body);
+            console.tag('Lottery').log('New lottery! #' + game.id);
+            io.sockets.emit('newLottery', game);
+            bot.handleOffers();
+            //redisClient.del('usersQueue.list');
+        },function(response){
+            console.tag('Lottery').error('Something wrong [newLottery]');
+            setTimeout(newLottery, 1000);
+        });
+}
 function newGame(){
     requestify.post('http://'+config.domain+'/api/newGame', {
         secretKey: config.secretKey
@@ -180,6 +198,21 @@ function newGame(){
         });
 }
 
+function showSliderWinnersLottery(){
+    requestify.post('http://'+config.domain+'/api/getWinnersLottery', {
+        secretKey: config.secretKey
+    })
+        .then(function(response) {
+            var winners = response.body;
+            data = JSON.parse(winners);
+            io.sockets.emit('sliderLottery', data);
+            setTimeout(newLottery, 10000);
+            console.tag('Lottery').log('Show slider!');
+        },function(response){
+            console.tag('Lottery').error('Something wrong [showSlider]');
+            setTimeout(showSliderWinners, 1000);
+        });
+}
 function showSliderWinners(){
     requestify.post('http://'+config.domain+'/api/getWinners', {
         secretKey: config.secretKey
