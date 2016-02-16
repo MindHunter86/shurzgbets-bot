@@ -46,7 +46,9 @@ app.use('/logs', auth.connect(basicAuth), scribe.webPanel());
 redisClient.subscribe(config.prefix + 'show.winners');
 redisClient.subscribe(config.prefix + 'queue');
 redisClient.subscribe(config.prefix + 'newDeposit');
+redisClient.subscribe(config.prefix + 'newPlayer');
 redisClient.subscribe(config.prefix + 'depositDecline');
+redisClient.subscribe(config.prefix + 'show.lottery.winners');
 
 redisClient.setMaxListeners(0);
 redisClient.on("message", function(channel, message) {
@@ -63,6 +65,9 @@ redisClient.on("message", function(channel, message) {
     if(channel == 'show.lottery.winners') {
         console.log('Start Winner Lottery');
         showSliderWinnersLottery();
+    }
+    if(channel == config.prefix + 'newPlayer'){
+        io.sockets.emit(channel, message);
     }
     if(channel == config.prefix + 'newDeposit'){
         io.sockets.emit(channel, message);
