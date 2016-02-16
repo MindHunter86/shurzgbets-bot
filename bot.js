@@ -249,7 +249,7 @@ var parseOffer = function(offer, offerJson) {
                     console.log(err);
                     console.tag('SteamBot').error('Error to load inventory');
                     redisClient.multi([
-                        ["lrem", redisChannels.usersQueue, 1, offer.steamid_other],
+                        ["lrem", redisChannels.usersQueue, 0, offer.steamid_other],
                         ['lrem', redisChannels.checkItemsList, 0, offerJson]
                     ])
                     .exec(function (err, replies) {
@@ -491,7 +491,7 @@ var checkedOffersProcceed = function(offerJson){
                 if (!err) {
                     redisClient.multi([
                         ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                        ["lrem", redisChannels.usersQueue, 1, offer.steamid64],
+                        ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
                         ["rpush", redisChannels.betsList, offerJson],
                         ["lrem", redisChannels.checkedList, 0, offerJson]
                     ])
@@ -520,7 +520,7 @@ var checkedOffersProcceed = function(offerJson){
                             if(offerCheck.trade_offer_state == 3){
                                 redisClient.multi([
                                     ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                                    ["lrem", redisChannels.usersQueue, 1, offer.steamid64],
+                                    ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
                                     ["rpush", redisChannels.betsList, offerJson],
                                     ["lrem", redisChannels.checkedList, 0, offerJson]
                                 ])
@@ -533,7 +533,7 @@ var checkedOffersProcceed = function(offerJson){
                             }else {
                                 redisClient.multi([
                                     ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                                    ["lrem", redisChannels.usersQueue, 1, offer.steamid64],
+                                    ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
                                     ["lrem", redisChannels.checkedList, 0, offerJson]
                                 ])
                                     .exec(function (err, replies) {
