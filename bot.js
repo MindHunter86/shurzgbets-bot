@@ -714,7 +714,7 @@ var queueProceed = function() {
             sendProcceedLottery = true;
             redisClient.lindex(redisChannels.sendOffersListLottery, 0,function (err, offerJson) {
                 offer = JSON.parse(offerJson);
-                sendTradeOfferLottery(offer.appId, offer.steamid, offer.accessToken, offer.items, '', offer.game, offerJson);
+                sendTradeOfferLottery(offer.appId, offer.steamid, offer.accessToken, JSON.parse(offer.items), '', offer.game, offerJson);
             });
         }
     });
