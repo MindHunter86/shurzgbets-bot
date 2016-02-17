@@ -442,11 +442,11 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
             }else{
                 console.tag('SteamBot', 'SendPrize').log('Items not found!');
                 //setPrizeStatus(game, 2);
-                sendProcceedLottery = false;
-                /*redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
-                    setPrizeStatus(game, 2);
-                    sendProcceed = false;
-                });*/
+                //sendProcceedLottery = false;
+                redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
+                    //setPrizeStatus(game, 2);
+                    sendProcceedLottery = false;
+                });
             }
         });
 
