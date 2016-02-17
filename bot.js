@@ -115,7 +115,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                     handleOffers();
                 });
                 redisClient.del(redisChannels.usersQueue);
-                //redisClient.del(redisChannels.sendOffersList);
+                redisClient.del(redisChannels.sendOffersListLottery);
                 confirmations.setCookies(newCookie);
                 confirmations.startConfirmationChecker(10000, '67u9HbjfC0uSyfGE9BSfL0x4Ln4=');
                 steamBotLogger('Setup Offers!');
