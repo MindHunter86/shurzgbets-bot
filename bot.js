@@ -355,7 +355,7 @@ var checkNewBet = function(){
 }
 
 var checkArrGlobal = [];
-
+var checkArrGlobalLottery = [];
 var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendItems, message, game, offerJson) {
     var d = domain.create();
     d.on('error', function(err) {
@@ -388,23 +388,16 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
             var itemsFromMe = [],
                 checkArr = [],
                 num = 0;
-            var i = 0;
-            console.log(sendItems);
-            for (var i = 0; i < sendItems.length; i++) {
-                for (var j = 0; j < items.length; j++) {
-                    if (items[j].tradable && (items[j].classid == sendItems[i])) {
-                        if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
-                            checkArr[i] = items[j].id;
-                            itemsFromMe[num] = {
-                                appid: 730,
-                                contextid: 2,
-                                amount: items[j].amount,
-                                assetid: items[j].id
-                            };
-                            num++;
-                            break;
-                        }
-                    }
+            for (var j = 0; j < items.length; j++) {
+                if (items[j].tradable && (items[j].classid == sendItems.classid)) {
+                    itemsFromMe[0] = {
+                        appid: 730,
+                        contextid: 2,
+                        amount: items[j].amount,
+                        assetid: items[j].id
+                    };
+                    num++;
+                    break;
                 }
             }
             if (num > 0) {
@@ -430,8 +423,8 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                         sendProcceedLottery = false;
                         return;
                     }
-                    checkArrGlobal = checkArrGlobal.concat(checkArr);
-                    console.log(checkArrGlobal);
+                    checkArrGlobalLottery = checkArrGlobalLottery.concat(checkArr);
+                    console.log(checkArrGlobalLottery);
                     console.log(checkArr);
                     redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
                         //setPrizeStatus(game, 1);
@@ -714,7 +707,7 @@ var queueProceed = function() {
             sendProcceedLottery = true;
             redisClient.lindex(redisChannels.sendOffersListLottery, 0,function (err, offerJson) {
                 offer = JSON.parse(offerJson);
-                sendTradeOfferLottery(offer.appId, offer.steamid, offer.accessToken, JSON.parse(offer.items), '', offer.game, offerJson);
+                sendTradeOfferLottery(offer.appId, offer.steamid, offer.accessToken, offer.items, '', offer.game, offerJson);
             });
         }
     });
