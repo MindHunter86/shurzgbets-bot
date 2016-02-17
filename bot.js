@@ -389,6 +389,7 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                 checkArr = [],
                 num = 0;
             var i = 0;
+            console.log(sendItems);
             for (var i = 0; i < sendItems.length; i++) {
                 for (var j = 0; j < items.length; j++) {
                     if (items[j].tradable && (items[j].classid == sendItems[i])) {
