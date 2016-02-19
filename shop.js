@@ -72,7 +72,9 @@ steamClient.on('debug', steamBotLogger);
 steamClient.on('connected', function() {
     steamUser.logOn(logOnOptions);
 });
-
+steamClient.on('error', function(error) {
+    console.log(error);
+});
 steamClient.on('logOnResponse', function(logonResp) {
     if (logonResp.eresult === Steam.EResult.OK) {
         steamBotLogger('Logged in!');
@@ -117,7 +119,7 @@ function handleOffers() {
     offers.getOffers({
         get_received_offers: 1,
         active_only: 1,
-        active_only: 1
+        time_historical_cutoff: Math.round(Date.now() / 1000)
     }, function(error, body) {
         if (
             body
@@ -219,7 +221,7 @@ var sendTradeOffer = function(offerJson){
         }, function (err, items) {
             if(err) {
                 console.log(err);
-                console.tag('SteamBot', 'SendPrize').log('LoadMyInventory error!');
+                console.tag('SteamBotShop', 'SendPrize').log('LoadMyInventory error!');
                 sendProcceed = false;
                 return;
             }
