@@ -156,8 +156,14 @@ function handleOffers() {
                                                                 quality = item.tags[1].name;
                                                             }
                                                             else if(type === 'Container') { 
-                                                                rarity = item.tags[3].name;
-                                                                quality = item.tags[2].name;
+                                                                if(item.tags[2].name === undefined || item.tags[2].name === undefined) {
+                                                                    rarity = 'Base Grade';
+                                                                    quality = 'Normal';
+                                                                }
+                                                                else {
+                                                                    rarity = item.tags[3].name;
+                                                                    quality = item.tags[2].name;
+                                                                }
                                                             }
                                                             else if(type === 'Key') {
                                                                 rarity = item.tags[2].name;
