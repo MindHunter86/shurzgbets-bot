@@ -99,7 +99,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                     });
                     handleOffers();
                 });
-                redisClient.del(redisChannels.itemsToGive);
+                //redisClient.del(redisChannels.itemsToGive);
                 redisClient.del(redisChannels.offersToCheck);
                 confirmations.setCookies(newCookie);
                 confirmations.startConfirmationChecker(10000, 'LCDy7k8u2Dz5YzwdgyjvWeuwR/0=');
@@ -156,7 +156,7 @@ function handleOffers() {
                                                                 quality = item.tags[1].name;
                                                             }
                                                             else if(type === 'Container') { 
-                                                                if(item.tags[2].name === undefined || item.tags[2].name === undefined) {
+                                                                if(typeof item.tags[2].name == 'undefined' || typeof item.tags[2].name == 'undefined') {
                                                                     rarity = 'Base Grade';
                                                                     quality = 'Normal';
                                                                 }
