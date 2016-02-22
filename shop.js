@@ -60,8 +60,7 @@ var checkingOffers = [],
 
 const redisChannels = {
     itemsToSale: 'items.to.sale',
-    itemsToGive: 'items.to.give',
-    offersToCheck: 'offers.to.check'
+    itemsToGive: 'items.to.give'
 }
 
 function steamBotLogger(log){
@@ -100,7 +99,6 @@ steamClient.on('logOnResponse', function(logonResp) {
                     handleOffers();
                 });
                 //redisClient.del(redisChannels.itemsToGive);
-                redisClient.del(redisChannels.offersToCheck);
                 confirmations.setCookies(newCookie);
                 confirmations.startConfirmationChecker(10000, 'LCDy7k8u2Dz5YzwdgyjvWeuwR/0=');
                 steamBotLogger('Setup Offers!');
@@ -147,40 +145,20 @@ function handleOffers() {
                                                     i = 0;
                                                     botItems.forEach(function(item){
                                                         if(itemsForParse.indexOf(item.id) != -1){
-                                                            var type = item.tags[0].name;
-                                                            var rarity;
-                                                            var quality;
+                                                            var tags = [];
+                                                            var parse = item.tags;
+                                                            parse.forEach(function(i) {
+                                                                tags[i.category] = i.name;
+                                                            });
 
-                                                            if(type === 'Sticker') { 
-                                                                rarity = item.tags[2].name;
-                                                                quality = item.tags[1].name;
-                                                            }
-                                                            else if(type === 'Container') { 
-                                                                if(typeof item.tags[2].name == 'undefined' || typeof item.tags[2].name == 'undefined') {
-                                                                    rarity = 'Base Grade';
-                                                                    quality = 'Normal';
-                                                                }
-                                                                else {
-                                                                    rarity = item.tags[3].name;
-                                                                    quality = item.tags[2].name;
-                                                                }
-                                                            }
-                                                            else if(type === 'Key') {
-                                                                rarity = item.tags[2].name;
-                                                                quality = item.tags[1].name;
-                                                            }
-                                                            else {
-                                                                rarity = item.tags[4].name;
-                                                                quality = item.tags[5].name;
-                                                            }
                                                             itemsForSale[i++] = {
                                                                 inventoryId: item.id,
                                                                 classId: item.classid,
                                                                 name: item.name,
                                                                 market_hash_name: item.market_hash_name,
-                                                                rarity: rarity,
-                                                                quality: quality,
-                                                                type: type
+                                                                rarity: tags['Rarity'],
+                                                                quality: tags['Quality'],
+                                                                type: tags['Type']
                                                             }
                                                         }
                                                     });
@@ -212,6 +190,12 @@ steamUser.on('tradeOffers', function(number) {
     }
 });
 
+function getErrorCode(err, callback){
+    var errCode = 0;
+    var match = err.match(/\(([^()]*)\)/);
+    if(match != null && match.length == 2) errCode = match[1];
+    callback(errCode);
+}
 var sendTradeOffer = function(offerJson){
     var d = domain.create();
     d.on('error', function(err) {
@@ -250,28 +234,24 @@ var sendTradeOffer = function(offerJson){
                     accessToken: offer.accessToken,
                     itemsFromMe: itemsFromMe,
                     itemsFromThem: [],
-                    message: ''
+                    message: 'Покупка в магазине '+ config.domain
                 }, function (err, response) {
                     if (err) {
-                        if((err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1)) {
-                            console.log('true');
-                            redisClient.lrem(redisChannels.itemsToGive, 0, offerJson, function(err, data){
-                                setItemStatus(offer.id, 4);
-                                sendProcceed = false;
-                            });
-                            return;
-                        }
-                        redisClient.lrem(redisChannels.itemsToGive, 0, offerJson, function(err, data){
-                            console.tag('SteamBotShop', 'SendItem').error('Error to send offer. Error: ' + err);
-                            setItemStatus(offer.id, 4);
-                            sendProcceed = false;
+                        getErrorCode(err.message, function(errCode) {
+                            if(errCode == 15 || errCode == 25 || err.message.indexOf('an error sending your trade offer.  Please try again later.')) {
+                                redisClient.lrem(redisChannels.itemsToGive, 0, offerJson, function(err, data){
+                                    setItemStatus(offer.id, 4);
+                                    sendProcceed = false;
+                                });  
+                            }
                         });
+                        sendProcceed = false;
+                        return;
                     }
                     redisClient.lrem(redisChannels.itemsToGive, 0, offerJson, function(err, data){
                         sendProcceed = false;
                         setItemStatus(offer.id, 3);
                         console.tag('SteamBotShop', 'SendItem').log('TradeOffer #' + response.tradeofferid +' send!');
-                        redisClient.rpush(redisChannels.offersToCheck, response.tradeofferid);
                     });
                 });
             }else{
@@ -315,40 +295,6 @@ var addNewItems = function(){
         });
 }
 
-var checkOfferForExpired = function(offer){
-    offers.getOffer({tradeOfferId: offer}, function (err, body){
-        if(body.response.offer){
-            var offerCheck = body.response.offer;
-            if(offerCheck.trade_offer_state == 2) {
-                var timeCheck = Math.floor(Date.now() / 1000) - offerCheck.time_created;
-                console.log(timeCheck);
-                if(timeCheck >= config.shopBot.timeForCancelOffer){
-                    offers.cancelOffer({tradeOfferId: offer}, function(err, response){
-                        if(!err){
-                            redisClient.lrem(redisChannels.offersToCheck, 0, offer, function(err, data){
-                                steamBotLogger('Offer #' + offer + ' was expired!')
-                                checkProcceed = false;
-                            });
-                        }else{
-                            checkProcceed = false;
-                        }
-                    });
-                }else{
-                    checkProcceed = false;
-                }
-                return;
-            }else if(offerCheck.trade_offer_state == 3 || offerCheck.trade_offer_state == 7){
-                redisClient.lrem(redisChannels.offersToCheck, 0, offer, function(err, data){
-                    checkProcceed = false;
-                });
-            }else{
-                checkProcceed = false;
-            }
-        }else{
-            checkProcceed = false;
-        }
-    })
-}
 
 var queueProceed = function(){
     redisClient.llen(redisChannels.itemsToSale, function(err, length) {
@@ -364,17 +310,6 @@ var queueProceed = function(){
             sendProcceed = true;
             redisClient.lindex(redisChannels.itemsToGive, 0,function (err, offerJson) {
                 sendTradeOffer(offerJson);
-            });
-        }
-    });
-    redisClient.llen(redisChannels.offersToCheck, function(err, length) {
-        if (length > 0 && !checkProcceed && WebSession) {
-            console.tag('SteamBotShop','Queues').info('Check Offers:' + length);
-            checkProcceed = true;
-            redisClient.lindex(redisChannels.offersToCheck, 0,function (err, offer) {
-                setTimeout(function(){
-                    checkOfferForExpired(offer)
-                }, 1000 * config.shopBot.timeForCancelOffer);
             });
         }
     });
