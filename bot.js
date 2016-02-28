@@ -534,12 +534,12 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                 });
             }else{
                 console.tag('SteamBot', 'SendPrize').log('Items not found!');
-                setPrizeStatus(game, 2);
-                sendProcceed = false;
-                /*redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
+                //setPrizeStatus(game, 2);
+                //sendProcceed = false;
+                redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
                     setPrizeStatus(game, 2);
                     sendProcceed = false;
-                });*/
+                });
             }
         });
 
