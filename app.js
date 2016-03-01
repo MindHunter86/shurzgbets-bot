@@ -16,19 +16,8 @@ var auth = require('http-auth'),
     bot     = require('./bot.js'),
     shop     = require('./shop.js');
 
-if (process.env.REDIS_URL) {
-    var redisUrl    = require('url').parse(process.env.REDIS_URL);
-    var redisClient = redis.createClient(redisUrl.port, redisUrl.hostname);
-    var client      = redis.createClient(redisUrl.port, redisUrl.hostname);
-    /* 
-        Use it only when need to auth
-        redisClient.auth(redisUrl.auth.split(":")[1]);
-        client.auth(redisUrl.auth.split(":")[1]);
-    */
-} else {
-    var redisClient = redis.createClient(),
-        client = redis.createClient();
-}
+var redisClient = redis.createClient(),
+    client = redis.createClient();
 
 bot.init(redis, io, requestify);
 shop.init(redis, requestify);

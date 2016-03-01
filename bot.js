@@ -14,16 +14,7 @@ var domain = require('domain');
 var redisClient, io, requestify;
 module.exports.init = function(redis, ioSocket, requestifyCore) {
     io = ioSocket;
-    if (process.env.REDIS_URL) {
-        var redisUrl    = require('url').parse(process.env.REDIS_URL);
-        redisClient = redis.createClient(redisUrl.port, redisUrl.hostname);
-        /* 
-            Use it only when need to auth
-            redisClient.auth(redisUrl.auth.split(":")[1]);
-        */
-    } else {
-        redisClient = redis.createClient();
-    }
+    redisClient = redis.createClient();
     requestify = requestifyCore;
 }
 
