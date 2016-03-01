@@ -18,7 +18,7 @@ var config = {
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
     domain: 'itemup.ru',	//домен сайта
-    secretKey: 'oDWx4GYTr4Acbdms',
+    secretKey: 'WJeqewqeihqwWNewIoqweqw',
     
     admins: [	//steam id админов
         '76561198227021736',
