@@ -168,7 +168,7 @@ function newLottery(){
         });
 }
 function newGame(){
-    requestify.post('http://'+config.domain+'/api/newGame', {
+    requestify.post('https://'+config.domain+'/api/newGame', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -193,7 +193,7 @@ function newGame(){
 }
 
 function showSliderWinnersLottery(){
-    requestify.post('http://'+config.domain+'/api/getWinnersLottery', {
+    requestify.post('https://'+config.domain+'/api/getWinnersLottery', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -208,7 +208,7 @@ function showSliderWinnersLottery(){
         });
 }
 function showSliderWinners(){
-    requestify.post('http://'+config.domain+'/api/getWinners', {
+    requestify.post('https://'+config.domain+'/api/getWinners', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -224,7 +224,7 @@ function showSliderWinners(){
 }
 
 function setGameStatus(status){
-    requestify.post('http://'+config.domain+'/api/setGameStatus', {
+    requestify.post('https://'+config.domain+'/api/setGameStatus', {
         status: status,
         secretKey: config.secretKey
     })
