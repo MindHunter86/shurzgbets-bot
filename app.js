@@ -23,7 +23,7 @@ bot.init(redis, io, requestify);
 shop.init(redis, requestify);
 server.listen(8080);
 
-console.log('Server started on ' + config.domain + ':' + ports);
+console.log('Server started on ' + config.domain + ':5000');
 
 var basicAuth = auth.basic({ //basic auth config
     realm: "WebPanel",
