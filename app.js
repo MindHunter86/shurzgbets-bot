@@ -15,7 +15,6 @@ var auth = require('http-auth'),
     requestify   = require('requestify'),
     bot     = require('./bot.js'),
     shop     = require('./shop.js');
-    https = require('https');
 
 var redisClient = redis.createClient(),
     client = redis.createClient();
