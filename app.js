@@ -15,6 +15,7 @@ var auth = require('http-auth'),
     requestify   = require('requestify'),
     bot     = require('./bot.js'),
     shop     = require('./shop.js');
+    https = require('https');
 
 var redisClient = redis.createClient(),
     client = redis.createClient();
@@ -135,13 +136,14 @@ function startNGTimer(winners){
         }
     }, 1000);
 }
+requestify.post('https://encrypted.google.com').then(function(response) {
+    console.log(response.body);
+}, function() {
+
+});
 function getCurrentGame(){
-    requestify.request('https://'+config.domain+'/api/getCurrentGame', {
-        method: 'POST',
-        body: {
-            secretKey: config.secretKey
-        },
-        ca: fs.readFileSync('./ssl/startcom.ca.crt')
+    requestify.post('https://'+config.domain+'/api/getCurrentGame', {
+        secretKey: config.secretKey
     })
         .then(function(response) {
             game = JSON.parse(response.body);
