@@ -21,8 +21,7 @@ var redisClient = redis.createClient(),
 
 bot.init(redis, io, requestify);
 shop.init(redis, requestify);
-var ports = process.env.PORT || 5000;
-server.listen(5000);
+server.listen(8080);
 
 console.log('Server started on ' + config.domain + ':' + ports);
 
