@@ -135,12 +135,13 @@ function startNGTimer(winners){
         }
     }, 1000);
 }
-requestify.post('https://encrypted.google.com').then(function(response) {
+function getCurrentGame(){
+    requestify.post('https://encrypted.google.com').then(function(response) {
+    console.log('google');
     console.log(response.body);
 }, function() {
-
+    console.log('eeror google');
 });
-function getCurrentGame(){
     requestify.post('https://'+config.domain+'/api/getCurrentGame', {
         secretKey: config.secretKey
     })
