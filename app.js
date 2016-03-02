@@ -136,7 +136,7 @@ function startNGTimer(winners){
     }, 1000);
 }
 function getCurrentGame(){
-    requestify.get('https://encrypted.google.com').then(function(response) {
+    requestify.get('https://itemup.ru').then(function(response) {
     console.log('itemup');
     console.log(response.body);
 }, function(error) {
