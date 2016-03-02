@@ -135,10 +135,13 @@ function startNGTimer(winners){
         }
     }, 1000);
 }
-
 function getCurrentGame(){
-    requestify.post('https://'+config.domain+'/api/getCurrentGame', {
-        secretKey: config.secretKey
+    requestify.request('https://'+config.domain+'/api/getCurrentGame', {
+        method: 'POST',
+        body: {
+            secretKey: config.secretKey
+        },
+        ca: fs.readFileSync('./ssl/itemup_ru.crt')
     })
         .then(function(response) {
             game = JSON.parse(response.body);
