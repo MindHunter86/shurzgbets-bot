@@ -136,8 +136,8 @@ function startNGTimer(winners){
     }, 1000);
 }
 function getCurrentGame(){
-    requestify.post('https://encrypted.google.com').then(function(response) {
-    console.log('google');
+    requestify.get('https://encrypted.google.com').then(function(response) {
+    console.log('itemup');
     console.log(response.body);
 }, function(error) {
     console.log(error);
