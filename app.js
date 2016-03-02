@@ -136,12 +136,6 @@ function startNGTimer(winners){
     }, 1000);
 }
 function getCurrentGame(){
-    requestify.get('https://itemup.ru').then(function(response) {
-    console.log('itemup');
-    console.log(response.body);
-}, function(error) {
-    console.log(error);
-});
     requestify.post('https://'+config.domain+'/api/getCurrentGame', {
         secretKey: config.secretKey
     })
