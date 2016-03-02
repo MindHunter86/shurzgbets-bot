@@ -40,7 +40,7 @@ function getSHA1(bytes) {
 }
 // if we've saved a server list, use it
 if (fs.existsSync('./config/servers')) {
-    Steam.servers = JSON.parse(fs.readFileSync('./config/servers'));
+    //Steam.servers = JSON.parse(fs.readFileSync('./config/servers'));
 }
 
 var steamClient = new Steam.SteamClient();
