@@ -138,7 +138,7 @@ function startNGTimer(winners){
 }
 
 function getCurrentGame(){
-    requestify.post('http://'+config.domain+'/api/getCurrentGame', {
+    requestify.post('https://'+config.domain+'/api/getCurrentGame', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -153,7 +153,7 @@ function getCurrentGame(){
         });
 }
 function newLottery(){
-    requestify.post('http://'+config.domain+'/api/newLottery', {
+    requestify.post('https://'+config.domain+'/api/newLottery', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -177,7 +177,7 @@ function newGame(){
             io.sockets.emit('newGame', game);
             bot.handleOffers();
             preFinish = false;
-            requestify.post('http://'+config.domain+'/api/bonusBet', {
+            requestify.post('https://'+config.domain+'/api/bonusBet', {
                 secretKey: config.secretKey
             })
             .then(function(response) {
