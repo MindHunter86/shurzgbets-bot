@@ -141,7 +141,7 @@ function getCurrentGame(){
         body: {
             secretKey: config.secretKey
         },
-        ca: fs.readFileSync('./ssl/startcom.chain.crts')
+        ca: fs.readFileSync('./ssl/startcom.ca.crt')
     })
         .then(function(response) {
             game = JSON.parse(response.body);
