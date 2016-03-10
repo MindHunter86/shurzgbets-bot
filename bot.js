@@ -404,7 +404,7 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                 }, function (err, response) {
                     if (err) {
                         console.log(err);
-                        if((err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1)) {
+                        if((err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1) || (err.toString().indexOf('(50)') != -1)) {
                             console.log('true');
                             redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
                                 //setPrizeStatus(game, 2);
