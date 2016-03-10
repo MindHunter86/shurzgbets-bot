@@ -413,6 +413,10 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                             return;
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer.' + err);
+                        redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
+                            //setPrizeStatus(game, 2);
+                            sendProcceedLottery = false;
+                        });
                         //setPrizeStatus(game, 1);
                         sendProcceedLottery = false;
                         return;
