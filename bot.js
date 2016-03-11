@@ -9,7 +9,7 @@ var SteamTradeOffers = require('steam-tradeoffers');
 var SteamTotp = require('steam-totp');
 var SteamCommunity = require('steamcommunity');
 var confirmations = new SteamCommunity();
-
+console.log('жопа')
 var domain = require('domain');
 var redisClient, io, requestify;
 module.exports.init = function(redis, ioSocket, requestifyCore) {
@@ -413,10 +413,7 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                             return;
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer.' + err);
-                        redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
-                            //setPrizeStatus(game, 2);
-                            sendProcceedLottery = false;
-                        });
+
                         //setPrizeStatus(game, 1);
                         sendProcceedLottery = false;
                         return;
