@@ -501,7 +501,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                 }, function (err, response) {
                     if (err) {
                         console.log(err);
-                        if((err.toString().indexOf('(50)') != -1) ||(err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1)) {
+                        if((err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1)) {
                             console.log('true');
                             redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
                                 setPrizeStatus(game, 2);
