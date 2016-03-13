@@ -7,24 +7,21 @@ var config = {
     prefix: '',
 	//настройка бота рулетки
     bot: {
-        username: 'sergoold',
-        password: 'Sergoproaloalo1488'
+        username: 'deeroltonananan',
+        password: 'afoCtevpjw11bX8'
     },
 	//настройки бота магазина
     shopBot: {
-        username: 'dotal_1',
-        password: 'QmjKTHvO',
+        username: 'pawanazutofilus',
+        password: 'DQdGDLFl31GgfAE',
         timeForCancelOffer: 1800
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
-    domain: 'itemup.ru',	//домен сайта
+    domain: 'joyskins.top',	//домен сайта
     secretKey: 'WJeqewqeihqwWNewIoqweqw',
     
     admins: [	//steam id админов
-        '76561198227021736',
-        '76561198239237004',
-        '76561198254647128',
-        '76561198256294412'
+        '76561198175079859','76561198039687585'
     ]
 }
 
