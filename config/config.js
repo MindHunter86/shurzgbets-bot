@@ -21,7 +21,7 @@ var config = {
     secretKey: 'WJeqewqeihqwWNewIoqweqw',
     
     admins: [	//steam id админов
-        '76561198175079859','76561198039687585'
+        '76561198175079859','76561198039687585'//
     ]
 }
 
