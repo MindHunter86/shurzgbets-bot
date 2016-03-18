@@ -148,7 +148,7 @@ function handleOffers() {
                                                                 name: item.name,
                                                                 market_hash_name: item.market_hash_name,
                                                                 rarity: tags['Rarity'],
-                                                                quality: tags['Quality'],
+                                                                quality: tags['Exterior'],
                                                                 type: tags['Type']
                                                             }
                                                         }

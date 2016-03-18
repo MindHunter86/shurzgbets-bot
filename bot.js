@@ -39,10 +39,10 @@ function getSHA1(bytes) {
     return shasum.read();
 }
 // if we've saved a server list, use it
-if (fs.existsSync('./config/servers')) {
+/*if (fs.existsSync('./config/servers')) {
     //Steam.servers = JSON.parse(fs.readFileSync('./config/servers'));
 }
-
+*/
 var steamClient = new Steam.SteamClient();
 var steamUser = new Steam.SteamUser(steamClient);
 var steamFriends = new Steam.SteamFriends(steamClient);
@@ -116,7 +116,7 @@ steamClient.on('logOnResponse', function(logonResp) {
 });
 
 steamClient.on('servers', function(servers) {
-    fs.writeFile('./config/servers', JSON.stringify(servers));
+    //fs.writeFile('./config/servers', JSON.stringify(servers));
 });
 steamClient.on('error', function(error) {
     console.log(error);
