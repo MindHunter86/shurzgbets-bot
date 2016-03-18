@@ -270,17 +270,20 @@ var parseOffer = function(offer, offerJson) {
                         market_hash_name:hitems[j].market_hash_name,
                         classid:hitems[j].classid
                     };
-                    var type = hitems[j].type;
+                    //var type = hitems[j].type;
                     var rarity = '';
-                    var types = ["StatTrak™ "," Pistol", " SMG", " Rifle", " Shotgun", " Sniper Rifle", " Machinegun", " Container", " Knife", " Sticker", " Music Kit", " Key", " Pass", " Gift", " Tag", " Tool"];
-                    var typesrep = ["","", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
-                    type = str_replace(types,typesrep,type);
-                    /*var arr = type.split(',');
-                    if (arr.length == 2) type = arr[1].trim();
-                    if (arr.length == 3) type = arr[2].trim();
-                    if (arr.length && arr[0] == 'Нож') type = '★';*/
-                    console.log(type);
-                    switch (type) {
+                    //var types = ["StatTrak™ "," Pistol", " SMG", " Rifle", " Shotgun", " Sniper Rifle", " Machinegun", " Container", " Knife", " Sticker", " Music Kit", " Key", " Pass", " Gift", " Tag", " Tool"];
+                    //var typesrep = ["","", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+                    //type = str_replace(types,typesrep,type);
+
+                    var tags = [];
+                    var parse = hitems[j].tags;
+                    parse.forEach(function(i) {
+                        tags[i.category] = i.name;
+                    });
+
+                    console.log(tags['Rarity']);
+                    switch (tags['Rarity']) {
                         case 'Mil-Spec Grade':      rarity = 'milspec'; break;
                         case 'Restricted':             rarity = 'restricted'; break;
                         case 'Classified':           rarity = 'classified'; break;
