@@ -118,7 +118,7 @@ function startTimer(){
 }
 
 function startNGTimer(winners){
-    var time = 15;
+    var time = 18;
     data = JSON.parse(winners);
     data.showSlider = true;
     clearInterval(ngtimer);
