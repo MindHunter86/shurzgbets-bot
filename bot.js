@@ -341,6 +341,7 @@ var checkNewBet = function(){
             var answer = JSON.parse(response.body);
             if(answer.success){
                 betsProcceed = false;
+                handleOffers();
             }
         },function(response){
             console.tag('SteamBot').error('Something wrong with send a new bet. Retry...');
