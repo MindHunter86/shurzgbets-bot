@@ -91,6 +91,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 });
                 //redisClient.del(redisChannels.itemsToGive);
                 confirmations.setCookies(newCookie);
+                redisClient.del(redisChannels.itemsToSale);
                 confirmations.startConfirmationChecker(10000, 'Gz+2GzTeEzK3kRDTltiycctlVAE==');
                 steamBotLogger('Setup Offers!');
             });
