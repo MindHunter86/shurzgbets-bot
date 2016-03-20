@@ -215,7 +215,7 @@ function handleOffers() {
                                 ['rpush', redisChannels.usersQueue, offer.steamid_other]
                             ]).exec(function(){
                                 redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                    addQueue(queues, queues.length);
+                                    io.sockets.emit('queue', queues);
                                 });
                             });
                             return;
@@ -246,7 +246,7 @@ var parseOffer = function(offer, offerJson) {
                     ])
                     .exec(function (err, replies) {
                         redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                            addQueue(queues, queues.length);
+                            io.sockets.emit('queue', queues);
                         });
                         countRetries[offerJson.tradeofferid] = 0;
                         offers.declineOffer({tradeOfferId: offer.tradeofferid});
@@ -587,7 +587,7 @@ var checkedOffersProcceed = function(offerJson){
                     ])
                         .exec(function (err, replies) {
                             redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                addQueue(queues, queues.length);
+                                io.sockets.emit('queue', queues);
                                 console.tag('SteamBot').log("New bet Accepted!");
                                 checkedProcceed = false;
                             });
@@ -616,7 +616,7 @@ var checkedOffersProcceed = function(offerJson){
                                 ])
                                     .exec(function (err, replies) {
                                         redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                            addQueue(queues, queues.length);
+                                            io.sockets.emit('queue', queues);
                                             checkedProcceed = false;
                                         });
                                     });
@@ -628,7 +628,7 @@ var checkedOffersProcceed = function(offerJson){
                                 ])
                                     .exec(function (err, replies) {
                                         redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                            addQueue(queues, queues.length);
+                                            io.sockets.emit('queue', queues);
  
                                             checkedProcceed = false;
                                         });
