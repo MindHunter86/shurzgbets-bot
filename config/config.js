@@ -7,10 +7,8 @@ var config = {
     prefix: '',
 	//настройка бота рулетки
     bot: {
-        username: 'pawanazutofilus',
-        password: 'DQdGDLFl31GgfAE'
-        //username: 'deeroltonananan',
-        //password: 'afoCtevpjw11bX8'
+        username: 'wasarbrllenere',
+        password: 'AG0HSJpn0JSw79'
     },
 	//настройки бота магазина
     shopBot: {
