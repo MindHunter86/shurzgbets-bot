@@ -76,6 +76,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 webCookie: newCookie
             }, function(err, APIKey) {
                 console.log('getSteamAPIKey shop');
+                console.log(APIKey);
                 offers.setup({
                     sessionID: sessionID,
                     webCookie: newCookie,
