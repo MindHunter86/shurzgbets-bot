@@ -7,8 +7,8 @@ var config = {
     prefix: '',
 	//настройка бота рулетки
     bot: {
-        username: 'wasarbrllenere',
-        password: 'AG0HSJpn0JSw79'
+        username: 'aldoodellanip',
+        password: 'n5Bd2PW2Ju0Jx'
     },
 	//настройки бота магазина
     shopBot: {
@@ -17,11 +17,11 @@ var config = {
         timeForCancelOffer: 1800
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
-    domain: 'joyskins.top',	//домен сайта
+    domain: 'shurzgbets.com',	//домен сайта
     secretKey: 'WJeqewqeihqwWNewIoqweqw',
     
     admins: [	//steam id админов
-        '76561198175079859','76561198039687585'//
+        '76561198175079859','76561198180956505'
     ]
 }
 
