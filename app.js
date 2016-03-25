@@ -87,7 +87,7 @@ var steamStatus = [],
     timer,
     ngtimer,
     timerStatus = false,
-    timerTime = 120,
+    timerTime = 80,
     preFinishingTime = 2;
 
 getCurrentGame();
