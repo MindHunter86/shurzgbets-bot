@@ -408,19 +408,13 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                 }, function (err, response) {
                     if (err) {
                         console.log(err);
-                        if((err.toString().indexOf('(50)') != -1) || (err.toString().indexOf('available') != -1) || (err.toString().indexOf('(15)') != -1)) {
+                        if((err.toString().indexOf('(50)') != -1) || (err.toString().indexOf('available') != -1) || (err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('400') != -1)) {
                             console.log('true');
                             redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
                                 //setPrizeStatus(game, 2);
                                 sendProcceedLottery = false;
                             });
                             return;
-                        }
-                        if(err == '400') {
-                            redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
-                                //setPrizeStatus(game, 2);
-                                sendProcceedLottery = false;
-                            });
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer.' + err);
 
