@@ -416,6 +416,12 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                             });
                             return;
                         }
+                        if(err == '400') {
+                            redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
+                                //setPrizeStatus(game, 2);
+                                sendProcceedLottery = false;
+                            });
+                        }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer.' + err);
 
                         //setPrizeStatus(game, 1);
