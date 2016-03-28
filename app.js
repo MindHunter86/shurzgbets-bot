@@ -14,13 +14,13 @@ var auth = require('http-auth'),
     redis   = require('redis'),
     requestify   = require('requestify'),
     bot     = require('./bot.js');
-    //shop     = require('./shop.js');
+    shop     = require('./shop.js');
 
 var redisClient = redis.createClient(),
     client = redis.createClient();
 
 bot.init(redis, io, requestify);
-//shop.init(redis, requestify);
+shop.init(redis, requestify);
 server.listen(8080, '127.0.0.1');
 
 console.log('Server started on ' + config.domain + ':5000');

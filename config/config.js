@@ -12,8 +12,8 @@ var config = {
     },
 	//настройки бота магазина
     shopBot: {
-        username: 'pawanazutofilus',
-        password: 'DQdGDLFl31GgfAE',//
+        username: 'frisondenuvicu',
+        password: 'pzJMKFrqBvE8CR',//
         timeForCancelOffer: 1800
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
