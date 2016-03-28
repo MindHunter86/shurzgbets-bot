@@ -70,12 +70,13 @@ redisClient.on("message", function(channel, message) {
 
 io.sockets.on('connection', function(socket) {
 
-    updateOnline();
+    /*updateOnline();
 
     socket.on('disconnect', function(){
         updateOnline();
-    })
+    })*/
 });
+setInterval(updateOnline(), 5000);
 
 function updateOnline(){
     io.sockets.emit('online', Object.keys(io.sockets.adapter.rooms).length);
