@@ -89,7 +89,7 @@ var steamStatus = [],
     ngtimer,
     timerStatus = false,
     timerTime = 80,
-    preFinishingTime = 20;
+    preFinishingTime = 23;
 
 getCurrentGame();
 //checkSteamInventoryStatus();
