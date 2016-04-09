@@ -106,6 +106,7 @@ function startTimer(){
         if((game.status == 1) && (time <= preFinishingTime)){
             if(!preFinish){
                 preFinish = true;
+                console.log('Отключаем карточки');
                 setGameStatus(2);
             }
         }
