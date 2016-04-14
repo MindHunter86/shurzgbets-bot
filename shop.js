@@ -99,7 +99,9 @@ steamClient.on('logOnResponse', function(logonResp) {
         });
     }
 });
-
+steamClient.on('loggedOff', function() {
+    steamClient.connect();
+});
 
 steamUser.on('updateMachineAuth', function(sentry, callback) {
     fs.writeFileSync('sentry_shop', sentry.bytes);
