@@ -25,7 +25,7 @@ var logOnOptions = {
 var authCode = ''; // code received by email
 
 try {
-    logOnOptions.two_factor_code = SteamTotp.getAuthCode('QUnukXvtO5yZps/xBqqIAH6OCoo=');
+    logOnOptions.two_factor_code = SteamTotp.getAuthCode('UwXVwOB+b40veuK716dlufOHwos=');
 } catch (e) {
     if (authCode !== '') {
         logOnOptions.auth_code = authCode;
@@ -93,7 +93,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 //redisClient.del(redisChannels.itemsToGive);
                 confirmations.setCookies(newCookie);
                 redisClient.del(redisChannels.itemsToSale);
-                confirmations.startConfirmationChecker(10000, '2RnncXpmMUBI6Zn2o/b0CVI6ttY=');
+                confirmations.startConfirmationChecker(10000, 'uXZiXdWjaFAogljIs7m4oe490iM=');
                 steamBotLogger('Setup Offers!');
             });
         });

@@ -7,21 +7,21 @@ var config = {
     prefix: '',
 	//настройка бота рулетки
     bot: {
-        username: 'aldoodellanip',
-        password: 'n5Bd2PW2Ju0Jx'
+        username: 'tmallidaxinnga',
+        password: 'mRZesXvuqzTlFb'
     },
 	//настройки бота магазина
     shopBot: {
-        username: 'frisondenuvicu',
-        password: 'pzJMKFrqBvE8CR',//
+        username: 'zettanalurzaish',
+        password: 'T3bqAUPrhUB5fNL',//
         timeForCancelOffer: 1800
     },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
     domain: 'shurzgbets.com',	//домен сайта
-    secretKey: 'WJeqewqeihqwWNewIoqweqw',
+    secretKey: '1K2wmLstWcMTirHs2rEeOKvyxDTkZVCclceg41Qqb2f6QJ2FaDEWtoUTpMjgBtjY',
     
     admins: [	//steam id админов
-        '76561198175079859','76561198180956505', '76561198227021736', '76561198254647128'
+        '76561198180956505'
     ]
 }
 
