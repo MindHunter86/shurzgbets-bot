@@ -26,7 +26,7 @@ var logOnOptions = {
 var authCode = ''; // code received by email
 
 try {
-    logOnOptions.two_factor_code = SteamTotp.getAuthCode('Bte/nmn1NIbx2OS5GhV9nMqr7kc=');
+    logOnOptions.two_factor_code = SteamTotp.getAuthCode(config.bot.shared_secret);
 } catch (e) {
     if (authCode !== '') {
         logOnOptions.auth_code = authCode;
@@ -108,7 +108,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 redisClient.del(redisChannels.usersQueue);
                 redisClient.del(redisChannels.sendOffersListLottery);
                 confirmations.setCookies(newCookie);
-                confirmations.startConfirmationChecker(10000, 'xHiyjMu/9UDG4jXv0KKFl810s1g=');
+                confirmations.startConfirmationChecker(10000, config.bot.identity_secret);
                 steamBotLogger('Setup Offers!');
             });
         });
@@ -141,7 +141,7 @@ function addQueue(steamid, count) {
     counts = 0;
     responses = [];
     var send = function() { 
-        requestify.post('https://'+config.domain+'/api/userqueue', {
+        requestify.post(config.protocol+'://'+config.domain+'/api/userqueue', {
             secretKey: config.secretKey,
             action: 'queueUser',
             id: steamid[counts]
@@ -317,7 +317,7 @@ var parseOffer = function(offer, offerJson) {
 }
 
 var checkOfferPrice = function(){
-    requestify.post('https://'+config.domain+'/api/checkOffer', {
+    requestify.post(config.protocol+'://'+config.domain+'/api/checkOffer', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -334,7 +334,7 @@ var checkOfferPrice = function(){
 }
 
 var checkNewBet = function(){
-    requestify.post('https://'+config.domain+'/api/newBet', {
+    requestify.post(config.protocol+'://'+config.domain+'/api/newBet', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -471,7 +471,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                     setPrizeStatus(game, 1);
                     sendProcceed = false;
                 //});
-                console.tag('SteamBot', 'SendPrize').log('LoadMyInventory error. Reset offers!');
+                console.tag('SteamBot', 'SendPrize').log('LoadMyInventory error ('+err.message+')  Reset offers!');
                 return;
             }
             var itemsFromMe = [],
@@ -543,7 +543,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
 };
 
 var setPrizeStatus = function(game, status){
-    requestify.post('https://'+config.domain+'/api/setPrizeStatus', {
+    requestify.post(config.protocol+'://'+config.domain+'/api/setPrizeStatus', {
         secretKey: config.secretKey,
         game: game,
         status: status
