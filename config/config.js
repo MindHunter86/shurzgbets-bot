@@ -1,9 +1,14 @@
 /*
 Config file
  */
+var loglv = {
+    ALL: 0,
+    INFO: 1,
+    LOG: 2,
+    ERROR: 3
+};
 
 var config = {
-    serverPort: 80,
     prefix: '',
 	//настройка бота рулетки
     bot: {
@@ -23,11 +28,14 @@ var config = {
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
     domain: 'shurzgbets.com',	//домен сайта
     protocol: 'https',
+    port: 8080,
     secretKey: '',
-    
+
+    loglevel: loglv.LOG,
     admins: [	//steam id админов
         ''
     ]
 }
 
 module.exports = config;
+module.exports.loglv = loglv;

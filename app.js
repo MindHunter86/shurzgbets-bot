@@ -4,10 +4,32 @@ var fs = require('fs');
     key: fs.readFileSync("/var/projects/itemup.ru/crts/www.itemupru.key"),
     cert: fs.readFileSync("/var/projects/itemup.ru/crts/www.itemupru.pem")
 };*/
+var scribe = require('scribe-js')({
+        createDefaultConsole: false
+    });
+var config  = require('./config/config.js');
+var console = scribe.console({
+        console : {
+            logInConsole: false
+        },
+        createBasic : false
+    });
+
+    console.addLogger('notice', 'grey', {
+        logInConsole: config.loglevel <= config.loglv.ALL
+    });
+    console.addLogger('info', 'cyan', {
+        logInConsole: config.loglevel <= config.loglv.INFO
+    });
+    console.addLogger('log', 'white', {
+        logInConsole: config.loglevel <= config.loglv.LOG
+    });
+    console.addLogger('error', 'red', {
+        logInConsole: config.loglevel <= config.loglv.ERROR
+    });
+process.console = console;
+
 var auth = require('http-auth'),
-    scribe = require('scribe-js')(),
-    console = process.console,
-    config  = require('./config/config.js'),
     app     = require('express')(),
     server  = require('http').createServer(app),
     io      = require('socket.io')(server),
@@ -21,9 +43,9 @@ var redisClient = redis.createClient(),
 
 bot.init(redis, io, requestify);
 shop.init(redis, requestify);
-server.listen(8080, '127.0.0.1');
+server.listen(config.port, '127.0.0.1');
 
-console.log('Server started on ' + config.domain + ':5000');
+console.log('Server started on ' + config.domain + ':' + config.port);
 
 var basicAuth = auth.basic({ //basic auth config
     realm: "WebPanel",
@@ -101,7 +123,7 @@ function startTimer(){
     clearInterval(timer);
     console.tag('Game').log('Game start.');
     timer = setInterval(function(){
-        console.tag('Game').log('Timer:' + time);
+        console.tag('Game').notice('Timer:' + time);
         io.sockets.emit('timer', time--);
         if((game.status == 1) && (time <= preFinishingTime)){
             if(!preFinish){
@@ -124,10 +146,11 @@ function startNGTimer(winners){
     data = JSON.parse(winners);
     data.showSlider = true;
     clearInterval(ngtimer);
+    bot.getBonusItems();
     ngtimer = setInterval(function(){
         bot.delayForNewGame(true);
         if(time <= 10) data.showSlider = false;
-        console.tag('Game').log('NewGame Timer:' + time);
+        console.tag('Game').notice('NewGame Timer:' + time);
         data.time = time--;
         io.sockets.emit('slider', data);
         if(time <= 0){
@@ -148,7 +171,7 @@ function getCurrentGame(){
             if(game.status == 2) startTimer();
             if(game.status == 3) newGame();
         },function(response){
-            console.tag('Game').log('Something wrong [getCurrentGame]');
+            console.tag('Game').error('Something wrong [getCurrentGame]');
             setTimeout(getCurrentGame, 1000);
         });
 }
@@ -181,9 +204,9 @@ function newGame(){
                 secretKey: config.secretKey
             })
             .then(function(response) {
-                console.log('bonus');
+                console.notice('Bonus added');
             }, function(response) {
-                console.log('error bonus');
+                console.notice('Error with bonus bet');
             });
             //redisClient.del('usersQueue.list');
         },function(response){
@@ -201,7 +224,7 @@ function showSliderWinnersLottery(){
             data = JSON.parse(winners);
             io.sockets.emit('sliderLottery', data);
             setTimeout(newLottery, 10000);
-            console.tag('Lottery').log('Show slider!');
+            console.tag('Lottery').notice('Show slider!');
         },function(response){
             console.tag('Lottery').error('Something wrong [showSlider]');
             setTimeout(showSliderWinnersLottery, 1000);
@@ -213,7 +236,7 @@ function showSliderWinners(){
     })
         .then(function(response) {
             var winners = response.body;
-            console.tag('Game').log('Show slider!');
+            console.tag('Game').notice('Show slider!');
             startNGTimer(winners);
             setGameStatus(3);
             //io.sockets.emit('slider', winners)
@@ -230,7 +253,7 @@ function setGameStatus(status){
     })
         .then(function(response) {
             game = JSON.parse(response.body);
-            console.tag('Game').log('Set game to a prefinishing status. Bets are redirected to a new game.');
+            if (status==3) console.tag('Game').log('Set game to a prefinishing status. Bets are redirected to a new game.');
         },function(response){
             console.tag('Game').error('Something wrong [setGameStatus]');
             setTimeout(setGameStatus, 1000);
@@ -246,8 +269,8 @@ function checkSteamInventoryStatus() {
             client.set('steam.community.status', steamStatus.SteamCommunity);
             client.set('steam.inventory.status', steamStatus.IEconItems);
         },function(response){
-            console.log('Something wrong [5]');
-            console.log(response.body);
+            console.error('Something wrong [checkSteamInventoryStatus]');
+            console.error(response.body);
         });
 }
 setInterval(checkSteamInventoryStatus, 120000);
