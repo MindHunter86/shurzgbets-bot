@@ -37,12 +37,14 @@ var auth = require('http-auth'),
     requestify   = require('requestify'),
     bot     = require('./bot.js');
     shop     = require('./shop.js');
+    //refbot     = require('./refbot.js');
 
 var redisClient = redis.createClient(),
     client = redis.createClient();
 
 bot.init(redis, io, requestify);
 shop.init(redis, requestify);
+//refbot.init(redis, requestify);
 server.listen(config.port, '127.0.0.1');
 
 console.log('Server started on ' + config.domain + ':' + config.port);
@@ -98,7 +100,27 @@ io.sockets.on('connection', function(socket) {
         updateOnline();
     })*/
 });
+var lastGameTimestamp = Date.now();
+setInterval(checkLastGame, 30000);
 setInterval(updateOnline, 5000);
+
+function checkLastGame() {
+    var currentTime = Date.now();
+    if (currentTime-lastGameTimestamp >= config.maxIntervalBetweenGames*60*1000) {
+        if (config.notifyURL && config.notifyURL.length) {
+            requestify.get(config.notifyURL)
+                .then(function(response) {
+                        console.log('Notify sended');
+                    },
+                function(response) {
+                        console.error('Cannot request notify URL');
+                    }
+                );
+        }
+        console.error('No games within '+config.maxIntervalBetweenGames+' minutes. Restarting.');
+        process.exit(0);
+    }
+}
 
 function updateOnline(){
     io.sockets.emit('online', Object.keys(io.sockets.adapter.rooms).length);
@@ -204,10 +226,16 @@ function newGame(){
                 secretKey: config.secretKey
             })
             .then(function(response) {
-                console.notice('Bonus added');
+                var data = JSON.parse(response.getBody());
+                if (data.success) {
+                    console.notice('Bonus added');
+                } else {
+                    console.tag('Bonus').log(data.message);
+                }
             }, function(response) {
                 console.notice('Error with bonus bet');
             });
+            lastGameTimestamp = Date.now();
             //redisClient.del('usersQueue.list');
         },function(response){
             console.tag('Game').error('Something wrong [newGame]');

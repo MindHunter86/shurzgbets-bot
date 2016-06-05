@@ -120,6 +120,10 @@ steamClient.on('servers', function(servers) {
 });
 steamClient.on('error', function(error) {
     console.error("Steam client error: "+error);
+    console.log('Try to reconnect');
+    logOnOptions.two_factor_code = SteamTotp.getAuthCode(config.bot.shared_secret);
+    steamClient.connect();
+
 });
 steamUser.on('updateMachineAuth', function(sentry, callback) {
     fs.writeFileSync('sentry', sentry.bytes);
@@ -510,7 +514,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
             var i = 0;
             for (var i = 0; i < sendItems.length; i++) {
                 for (var j = 0; j < items.length; j++) {
-                    if (items[j].tradable && (items[j].classid == sendItems[i])) {
+                    if (items[j].tradable && (items[j].market_hash_name == sendItems[i])) {
                         if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
                             checkArr[i] = items[j].id;
                             itemsFromMe[num] = {
@@ -606,20 +610,26 @@ var checkedOffersProcceed = function(offerJson){
             console.tag('SteamBot').log('Procceding accept: #' + offer.offerid);
             offers.acceptOffer({tradeOfferId: offer.offerid}, function (err, body) {
                 if (!err) {
-                    redisClient.multi([
-                        ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                        ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
-                        ["rpush", redisChannels.betsList, offerJson],
-                        ["lrem", redisChannels.checkedList, 0, offerJson]
-                    ])
-                        .exec(function (err, replies) {
-                            redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                io.sockets.emit('queue', queues);
-                                console.tag('SteamBot').notice("New bet Accepted!");
-                                checkedProcceed = false;
+                    //var tradeId = body.tradeid;
+                    //offers.getItems({tradeId: tradeId}, function (err, items) {
+                    //    offerJson.items = [];
+                    //    for (var i=0;i<items.length;i++) {
+                    //
+                    //    }
+                        redisClient.multi([
+                            ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
+                            ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
+                            ["rpush", redisChannels.betsList, offerJson],
+                            ["lrem", redisChannels.checkedList, 0, offerJson]
+                        ])
+                            .exec(function (err, replies) {
+                                redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
+                                    io.sockets.emit('queue', queues);
+                                    console.tag('SteamBot').notice("New bet Accepted!");
+                                    checkedProcceed = false;
+                                });
                             });
-                        });
-
+                    //});
                 } else {
                     console.tag('SteamBot').error('Error. With accept tradeoffer #' + offer.offerid)
                             .tag('SteamBot').error(err);

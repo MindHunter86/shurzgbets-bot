@@ -25,11 +25,21 @@ var config = {
         identity_secret: '',
         timeForCancelOffer: 1800
     },
+    //настройка бота рефки
+    referalBot: {
+        username: '',
+        password: '',
+        shared_secret: '',
+        identity_secret: ''
+    },
     apiKey: '89638B050C0254D97337012787F57F68',	//steam api key
     domain: 'shurzgbets.com',	//домен сайта
     protocol: 'https',
     port: 8080,
     secretKey: '',
+
+    maxIntervalBetweenGames: 20, //время (в минутах) через которое при отсутствии игр нода уйдет на перезапуск
+    notifyURL: '', //URL для оповещений
 
     loglevel: loglv.LOG,
     admins: [	//steam id админов
