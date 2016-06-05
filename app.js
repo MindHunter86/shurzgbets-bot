@@ -108,18 +108,30 @@ function checkLastGame() {
     var currentTime = Date.now();
     if (currentTime-lastGameTimestamp >= config.maxIntervalBetweenGames*60*1000) {
         if (config.notifyURL && config.notifyURL.length) {
-            requestify.get(config.notifyURL)
-                .then(function(response) {
+            try {
+                requestify.get(config.notifyURL)
+                    .then(function (response) {
                         console.log('Notify sended');
+                        exitApp();
                     },
-                function(response) {
+                    function (response) {
                         console.error('Cannot request notify URL');
+                        exitApp();
                     }
                 );
+            } catch (e) {
+                console.error('Cannot request notify URL ('+ e.message+')');
+                exitApp();
+            }
+        } else {
+            exitApp();
         }
-        console.error('No games within '+config.maxIntervalBetweenGames+' minutes. Restarting.');
-        process.exit(0);
     }
+}
+
+function exitApp() {
+    console.error('No games within '+config.maxIntervalBetweenGames+' minutes. Restarting.');
+    process.exit(0);
 }
 
 function updateOnline(){
