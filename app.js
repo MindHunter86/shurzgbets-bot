@@ -37,14 +37,14 @@ var auth = require('http-auth'),
     requestify   = require('requestify'),
     bot     = require('./bot.js');
     shop     = require('./shop.js');
-    //refbot     = require('./refbot.js');
+    refbot     = require('./refbot.js');
 
 var redisClient = redis.createClient(),
     client = redis.createClient();
 
 bot.init(redis, io, requestify);
 shop.init(redis, requestify);
-//refbot.init(redis, requestify);
+refbot.init(redis, requestify);
 server.listen(config.port, '127.0.0.1');
 
 console.log('Server started on ' + config.domain + ':' + config.port);
@@ -60,11 +60,12 @@ redisClient.subscribe(config.prefix + 'queue');
 redisClient.subscribe(config.prefix + 'newDeposit');
 redisClient.subscribe(config.prefix + 'newPlayer');
 redisClient.subscribe(config.prefix + 'depositDecline');
+redisClient.subscribe(config.prefix + 'infoMsg');
 redisClient.subscribe(config.prefix + 'show.lottery.winners');
 
 redisClient.setMaxListeners(0);
 redisClient.on("message", function(channel, message) {
-    if(channel == config.prefix + 'depositDecline' || channel == config.prefix + 'queue'){
+    if(channel == config.prefix + 'depositDecline' || channel == config.prefix + 'queue' || channel == config.prefix +'infoMsg'){
         io.sockets.emit(channel, message);
     }
     if(channel == config.prefix + 'show.winners'){
