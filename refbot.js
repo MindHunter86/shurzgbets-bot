@@ -76,7 +76,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 sessionID: sessionID,
                 webCookie: newCookie
             }, function(err, APIKey) {
-                console.log('getSteamAPIKey shop');
+                console.log('getSteamAPIKey refbot');
                 console.log(APIKey);
                 offers.setup({
                     sessionID: sessionID,
@@ -97,7 +97,7 @@ steamClient.on('loggedOff', function() {
 });
 
 steamUser.on('updateMachineAuth', function(sentry, callback) {
-    fs.writeFileSync('sentry_shop', sentry.bytes);
+    fs.writeFileSync('sentry_ref', sentry.bytes);
     callback({ sha_file: getSHA1(sentry.bytes) });
 });
 
@@ -233,7 +233,7 @@ var setReferalStatus = function(user, status){
     })
         .then(function(response) {
         },function(response){
-            console.tag('SteamBotShop').error('Something wrong with setItemStatus. Retry...');
+            console.tag('SteamRefBot').error('Something wrong with setItemStatus. Retry...');
             setTimeout(function(){setItemStatus()}, 1000);
         });
 }
