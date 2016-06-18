@@ -41,6 +41,11 @@ var config = {
     maxIntervalBetweenGames: 20, //время (в минутах) через которое при отсутствии игр нода уйдет на перезапуск
     notifyURL: '', //URL для оповещений
 
+    muteNotify: {
+        startHour: 1,
+        endHour: 6
+    },
+
     loglevel: loglv.LOG,
     admins: [	//steam id админов
         ''
