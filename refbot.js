@@ -14,6 +14,7 @@ var confirmations = new SteamCommunity();
 var redisClient, requestify;
 module.exports.init = function(redis, requestifyCore) {
     redisClient = redis.createClient();
+    redisClient.set('ref_cache_update',0);
 
     requestify = requestifyCore;
 }
@@ -292,6 +293,7 @@ function updateItemsCache() {
         })
             .then(function(response) {
                 console.tag('SteamRefBot').log('Item cache updated');
+                console.tag('SteamRefBot').log(response.body);
             },function(response){
                 console.tag('SteamRefBot').error('Something wrong with [updateItemsCache]');
                 redisClient.set('ref_cache_update',0);
