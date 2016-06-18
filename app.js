@@ -101,6 +101,18 @@ io.sockets.on('connection', function(socket) {
         updateOnline();
     })*/
 });
+
+function isNotifyMuted() {
+    var d = new Date();
+    var hour = d.getHours();
+    if (config.muteNotify.startHour<config.muteNotify.endHour)
+    {
+        return (hour>=config.muteNotify.startHour && hour<config.muteNotify.endHour)
+    } else {
+        return (hour>=config.muteNotify.startHour || hour<config.muteNotify.endHour)
+    }
+}
+
 var lastGameTimestamp = Date.now();
 setInterval(checkLastGame, 30000);
 setInterval(updateOnline, 5000);
@@ -108,7 +120,7 @@ setInterval(updateOnline, 5000);
 function checkLastGame() {
     var currentTime = Date.now();
     if (currentTime-lastGameTimestamp >= config.maxIntervalBetweenGames*60*1000) {
-        if (config.notifyURL && config.notifyURL.length) {
+        if (config.notifyURL && config.notifyURL.length && !isNotifyMuted()) {
             try {
                 requestify.get(config.notifyURL)
                     .then(function (response) {

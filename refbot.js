@@ -14,6 +14,7 @@ var confirmations = new SteamCommunity();
 var redisClient, requestify;
 module.exports.init = function(redis, requestifyCore) {
     redisClient = redis.createClient();
+
     requestify = requestifyCore;
 }
 
@@ -52,7 +53,8 @@ var checkingOffers = [],
 var checkArrGlobal = [];
 
 const redisChannels = {
-    itemsToSend: 'refitems.to.send'
+    itemsToSend: 'refitems.to.send',
+    newItems: 'newReferalItems'
 }
 
 function steamBotLogger(log){
@@ -156,36 +158,31 @@ var sendTradeOffer = function(offerJson){
     var offer = JSON.parse(offerJson);
     d.run(function () {
         offers.loadMyInventory({
-            appId: 730,
-            contextId: 2
-        }, function (err, items) {
-            if(err) {
-                console.tag('SteamRefBot', 'SendItems').error('LoadMyInventory error!');
-                console.error(err);
-                sendProcceed = false;
-                return;
-            }
-            var itemsFromMe = [],
-                checkArr = [];
-
-            offer.items.forEach(function (offerItem) {
-                for (var i=0;i<items.length;i++) {
-                    var item = items[i];
-                    if (item.market_hash_name == offerItem) {
-                        if ((checkArr.indexOf(item.id) == -1) && (checkArrGlobal.indexOf(item.id) == -1)) {
-                            checkArr.push(item.id);
-                            itemsFromMe.push({
-                                appid: 730,
-                                contextid: 2,
-                                amount: item.amount,
-                                assetid: item.id
-                            });
-                            break;
-                        }
+                    appId: 730,
+                    contextId: 2
+                }, function (err, items) {
+                    if(err) {
+                        console.tag('SteamRefBot', 'SendItems').error('LoadMyInventory error!');
+                        console.error(err);
+                        sendProcceed = false;
+                        return;
                     }
-                }
-            });
+                    var itemsFromMe = [];
 
+                    offer.items.forEach(function (offerItem) {
+                        for (var i=0;i<items.length;i++) {
+                            var item = items[i];
+                            if (item.tradable && item.id == offerItem.assetId) {
+                                    itemsFromMe.push({
+                                        appid: 730,
+                                        contextid: 2,
+                                        amount: item.amount,
+                                        assetid: item.id
+                                    });
+                                    break;
+                                }
+                        }
+            });
             if (itemsFromMe.length == offer.items.length) {
                 offers.makeOffer({
                     partnerSteamId: offer.partnerSteamId,
@@ -208,9 +205,8 @@ var sendTradeOffer = function(offerJson){
                     }
                     redisClient.lrem(redisChannels.itemsToSend, 0, offerJson, function(err, data){
                         sendProcceed = false;
-                        setReferalStatus(offer.userid, 3);
+                        setReferalStatus(offer.userid, 3, response.tradeofferid, offer.items);
                         console.tag('SteamRefBot', 'SendItems').log('TradeOffer #' + response.tradeofferid +' send!');
-                        checkArrGlobal = checkArrGlobal.concat(checkArr);
                     });
                 });
             }else{
@@ -225,16 +221,22 @@ var sendTradeOffer = function(offerJson){
 };
 
 
-var setReferalStatus = function(user, status){
+var setReferalStatus = function(user, status, tradeId, items){
+    if (typeof tradeId === 'undefined')
+        tradeId = 0;
+    if (typeof items === 'undefined')
+        items = [];
     requestify.post(config.protocol+'://'+config.domain+'/api/referal/updateStatus', {
         secretKey: config.secretKey,
         userid: user,
-        status: status
+        status: status,
+        tradeId: tradeId,
+        items: items
     })
         .then(function(response) {
         },function(response){
-            console.tag('SteamRefBot').error('Something wrong with setItemStatus. Retry...');
-            setTimeout(function(){setItemStatus()}, 1000);
+            console.tag('SteamRefBot').error('Something wrong with setReferalStatus. Retry...');
+            setTimeout(function(){setReferalStatus()}, 1000);
         });
 }
 
@@ -249,6 +251,50 @@ var queueProceed = function(){
         }
     });
 
+    redisClient.llen(redisChannels.newItems, function(err, length) {
+        if (length > 0 && WebSession) {
+            console.tag('SteamRefBot','Queues').info('Updating items cache');
+            redisClient.lpop(redisChannels.newItems, function (err, value) {
+                updateItemsCache();
+            });
+        }
+    });
 }
+
 var sendProcceed = false;
 setInterval(queueProceed, 1500);
+
+function updateItemsCache() {
+    offers.loadMyInventory({
+        appId: 730,
+        contextId: 2
+    }, function (err, items) {
+        if (err) {
+            console.tag('SteamRefBot', 'UpdateCache').error('LoadMyInventory error!');
+            console.error(err);
+            redisClient.set('ref_cache_update',0);
+            return;
+        }
+
+        var cache = [];
+
+        items.forEach(function (steamItem) {
+                        if (steamItem.tradable)
+                            cache.push({
+                                market_hash_name: steamItem.market_hash_name,
+                                assetId: steamItem.id
+                            });
+        });
+
+        requestify.post(config.protocol+'://'+config.domain+'/api/referal/updateItemsCache', {
+            secretKey: config.secretKey,
+            items: cache
+        })
+            .then(function(response) {
+                console.tag('SteamRefBot').log('Item cache updated');
+            },function(response){
+                console.tag('SteamRefBot').error('Something wrong with [updateItemsCache]');
+                redisClient.set('ref_cache_update',0);
+            });
+    });
+}
