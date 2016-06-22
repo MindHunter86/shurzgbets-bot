@@ -637,6 +637,7 @@ var checkedOffersProcceed = function(offerJson){
                         if (notParsed) {
                             console.tag('SteamBot').error('Cannot parse offered items');
                             console.tag('SteamBot').error(itemsOriginal);
+                            console.tag('SteamBot').error(offerJson);
                         }
                         redisClient.multi([
                             ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
