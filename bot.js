@@ -482,6 +482,7 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
 
 var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, message, game, offerJson) {
     var d = domain.create();
+    var offerData = JSON.parse(offerJson);
     d.on('error', function(err) {
         console.error(err.stack);
         console.tag('SteamBot').error('Error to send the bet');
@@ -514,8 +515,9 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                 num = 0;
             var i = 0;
             for (var i = 0; i < sendItems.length; i++) {
+                var itemNotFound = true;
                 for (var j = 0; j < items.length; j++) {
-                    if (items[j].tradable && (items[j].id == sendItems[i])) {
+                    if (items[j].tradable && (items[j].id == sendItems[i].assetId)) {
                         if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
                             checkArr[i] = items[j].id;
                             itemsFromMe[num] = {
@@ -524,8 +526,27 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                                 amount: items[j].amount,
                                 assetid: items[j].id
                             };
+                            itemNotFound = false;
                             num++;
                             break;
+                        }
+                    }
+                }
+                if (itemNotFound) {
+                    for (var j = 0; j < items.length; j++) {
+                        if (items[j].tradable && (items[j].classid == sendItems[i].classid)) {
+                            if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
+                                checkArr[i] = items[j].id;
+                                itemsFromMe[num] = {
+                                    appid: 730,
+                                    contextid: 2,
+                                    amount: items[j].amount,
+                                    assetid: items[j].id
+                                };
+                                itemNotFound = false;
+                                num++;
+                                break;
+                            }
                         }
                     }
                 }
@@ -614,11 +635,11 @@ var checkedOffersProcceed = function(offerJson){
                     var tradeId = body.tradeid;
                     offers.getItems({tradeId: tradeId}, function (err, items) {
                         if (err) {
-                            console.tag('SteamBot').error('Error with getting offered items');
+                            console.tag('SteamBot').error('Error with getting offered items trade #'+tradeId);
                             console.tag('SteamBot').error(err);
                         }
                         var notParsed = false;
-                        var itemsOriginal = items;
+                        var itemsOriginal = JSON.stringify(items);
                         for (var j=0;j<offer.items.length;j++) {
                             var offerItem = offer.items[j];
                             offer.items[j].assetId = 0;
@@ -655,7 +676,7 @@ var checkedOffersProcceed = function(offerJson){
                     });
                 } else {
                     console.tag('SteamBot').error('Error. With accept tradeoffer #' + offer.offerid)
-                            .tag('SteamBot').error(err);
+                            .tag('SteamBot').error(err).error(body);
                     offers.getOffer({tradeOfferId: offer.offerid}, function (err, body){
                         if(err) {
                             checkedProcceed = false;
@@ -677,6 +698,7 @@ var checkedOffersProcceed = function(offerJson){
                                     .exec(function (err, replies) {
                                         redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
                                             io.sockets.emit('queue', queues);
+                                            console.tag('SteamBot').log("New bet Accepted (without parsing)!");
                                             checkedProcceed = false;
                                         });
                                     });
