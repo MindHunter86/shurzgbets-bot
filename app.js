@@ -62,10 +62,11 @@ redisClient.subscribe(config.prefix + 'newPlayer');
 redisClient.subscribe(config.prefix + 'depositDecline');
 redisClient.subscribe(config.prefix + 'infoMsg');
 redisClient.subscribe(config.prefix + 'show.lottery.winners');
+redisClient.subscribe('admin_cache_update');
 
 redisClient.setMaxListeners(0);
 redisClient.on("message", function(channel, message) {
-    if(channel == config.prefix + 'depositDecline' || channel == config.prefix + 'queue' || channel == config.prefix +'infoMsg'){
+    if(channel == config.prefix + 'depositDecline' || channel == config.prefix + 'queue' || channel == config.prefix +'infoMsg' || channel == 'admin_cache_update'){
         io.sockets.emit(channel, message);
     }
     if(channel == config.prefix + 'show.winners'){

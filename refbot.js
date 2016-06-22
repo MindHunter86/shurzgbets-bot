@@ -91,6 +91,7 @@ steamClient.on('logOnResponse', function(logonResp) {
                 confirmations.setCookies(newCookie);
                 confirmations.startConfirmationChecker(10000, config.referalBot.identity_secret);
                 steamBotLogger('Setup Offers!');
+                handleOffers();
             });
         });
     }
@@ -171,6 +172,7 @@ var sendTradeOffer = function(offerJson){
                     var itemsFromMe = [];
 
                     offer.items.forEach(function (offerItem) {
+                        offerItem.market_hash_name = offerItem.market_hash_name.replace('StatTrak™','{StatTrak}');
                         for (var i=0;i<items.length;i++) {
                             var item = items[i];
                             if (item.tradable && item.id == offerItem.assetId) {
@@ -274,6 +276,10 @@ function updateItemsCache() {
             console.tag('SteamRefBot', 'UpdateCache').error('LoadMyInventory error!');
             console.error(err);
             redisClient.set('ref_cache_update',0);
+            redisClient.publish('admin_cache_update',{
+                text: 'Невозможно получить инвентарь бота',
+                type: 'error'
+            });
             return;
         }
 
@@ -282,7 +288,7 @@ function updateItemsCache() {
         items.forEach(function (steamItem) {
                         if (steamItem.tradable)
                             cache.push({
-                                market_hash_name: steamItem.market_hash_name,
+                                market_hash_name: steamItem.market_hash_name.replace('StatTrak™','{StatTrak}'),
                                 assetId: steamItem.id
                             });
         });
@@ -293,10 +299,18 @@ function updateItemsCache() {
         })
             .then(function(response) {
                 console.tag('SteamRefBot').log('Item cache updated');
-                console.tag('SteamRefBot').log(response.body);
+                console.tag('SteamRefBot').notice(response.body);
+                redisClient.publish('admin_cache_update',JSON.stringify({
+                    text: 'Обновление кэша закончено',
+                    type: 'success'
+                }));
             },function(response){
                 console.tag('SteamRefBot').error('Something wrong with [updateItemsCache]');
                 redisClient.set('ref_cache_update',0);
+                redisClient.publish('admin_cache_update',JSON.stringify({
+                    text: 'Ошибка при обработке цен',
+                    type: 'error'
+                }));
             });
     });
 }
