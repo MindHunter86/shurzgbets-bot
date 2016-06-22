@@ -613,8 +613,13 @@ var checkedOffersProcceed = function(offerJson){
                 if (!err) {
                     var tradeId = body.tradeid;
                     offers.getItems({tradeId: tradeId}, function (err, items) {
+                        if (err) {
+                            console.tag('SteamBot').error('Error with getting offered items');
+                            console.tag('SteamBot').error(err);
+                        }
                         for (var j=0;j<offer.items.length;j++) {
                             var offerItem = offer.items[j];
+                            offer.items[j].assetId = 0;
                             for (var i=0;i<items.length;i++) {
                                 if (offerItem.market_hash_name == items[i].market_hash_name) {
                                     offer.items[j].classid = items[i].classid;
