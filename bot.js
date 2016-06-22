@@ -304,7 +304,8 @@ var parseOffer = function(offer, offerJson) {
                         appid:hitems[j].appid,
                         name:hitems[j].market_name,
                         market_hash_name:hitems[j].market_hash_name,
-                        classid:hitems[j].classid
+                        classid:hitems[j].classid,
+                        assetId:hitems[j].id
                     };
                     //var type = hitems[j].type;
                     var rarity = '';
@@ -514,7 +515,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
             var i = 0;
             for (var i = 0; i < sendItems.length; i++) {
                 for (var j = 0; j < items.length; j++) {
-                    if (items[j].tradable && (items[j].market_hash_name == sendItems[i])) {
+                    if (items[j].tradable && (items[j].id == sendItems[i])) {
                         if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
                             checkArr[i] = items[j].id;
                             itemsFromMe[num] = {
@@ -529,7 +530,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                     }
                 }
             }
-            if (num > 0) {
+            if (num == sendItems.length) {
                 offers.makeOffer({
                     partnerSteamId: partnerSteamId,
                     accessToken: accessToken,
@@ -547,7 +548,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                             return;
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer. ' + err);
-                        setPrizeStatus(game, 1);
+                        setPrizeStatus(game, 2);
                         sendProcceed = false;
                         return;
                     }
@@ -610,16 +611,23 @@ var checkedOffersProcceed = function(offerJson){
             console.tag('SteamBot').log('Procceding accept: #' + offer.offerid);
             offers.acceptOffer({tradeOfferId: offer.offerid}, function (err, body) {
                 if (!err) {
-                    //var tradeId = body.tradeid;
-                    //offers.getItems({tradeId: tradeId}, function (err, items) {
-                    //    offerJson.items = [];
-                    //    for (var i=0;i<items.length;i++) {
-                    //
-                    //    }
+                    var tradeId = body.tradeid;
+                    offers.getItems({tradeId: tradeId}, function (err, items) {
+                        for (var j=0;j<offer.items.length;j++) {
+                            var offerItem = offer.items[j];
+                            for (var i=0;i<items.length;i++) {
+                                if (offerItem.market_hash_name == items[i].market_hash_name) {
+                                    offer.items[j].classid = items[i].classid;
+                                    offer.items[j].assetId = items[i].id;
+                                    items.splice(i,1);
+                                    break;
+                                }
+                            }
+                        }
                         redisClient.multi([
                             ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
                             ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
-                            ["rpush", redisChannels.betsList, offerJson],
+                            ["rpush", redisChannels.betsList, JSON.stringify(offer)],
                             ["lrem", redisChannels.checkedList, 0, offerJson]
                         ])
                             .exec(function (err, replies) {
@@ -629,7 +637,7 @@ var checkedOffersProcceed = function(offerJson){
                                     checkedProcceed = false;
                                 });
                             });
-                    //});
+                    });
                 } else {
                     console.tag('SteamBot').error('Error. With accept tradeoffer #' + offer.offerid)
                             .tag('SteamBot').error(err);
