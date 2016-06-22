@@ -617,17 +617,27 @@ var checkedOffersProcceed = function(offerJson){
                             console.tag('SteamBot').error('Error with getting offered items');
                             console.tag('SteamBot').error(err);
                         }
+                        var notParsed = false;
+                        var itemsOriginal = items;
                         for (var j=0;j<offer.items.length;j++) {
                             var offerItem = offer.items[j];
                             offer.items[j].assetId = 0;
-                            for (var i=0;i<items.length;i++) {
+                            for (var i = 0; i < items.length; i++) {
                                 if (offerItem.market_hash_name == items[i].market_hash_name) {
                                     offer.items[j].classid = items[i].classid;
                                     offer.items[j].assetId = items[i].id;
-                                    items.splice(i,1);
+                                    items.splice(i, 1);
                                     break;
                                 }
                             }
+                            if (offer.items[j].assetId == 0) {
+                                notParsed = true;
+                            }
+                        }
+                        if (notParsed) {
+                            console.tag('SteamBot').error('Cannot parse offered items');
+                            console.tag('SteamBot').error(itemsOriginal);
+                            console.tag('SteamBot').error(offerJson);
                         }
                         redisClient.multi([
                             ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
