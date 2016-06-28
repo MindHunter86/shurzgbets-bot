@@ -63,10 +63,17 @@ redisClient.subscribe(config.prefix + 'depositDecline');
 redisClient.subscribe(config.prefix + 'infoMsg');
 redisClient.subscribe(config.prefix + 'show.lottery.winners');
 redisClient.subscribe('admin_cache_update');
+redisClient.subscribe('user_send_error');
+redisClient.subscribe('news_update');
 
 redisClient.setMaxListeners(0);
 redisClient.on("message", function(channel, message) {
-    if(channel == config.prefix + 'depositDecline' || channel == config.prefix + 'queue' || channel == config.prefix +'infoMsg' || channel == 'admin_cache_update'){
+    if(channel == config.prefix + 'depositDecline' ||
+       channel == config.prefix + 'queue' ||
+       channel == config.prefix +'infoMsg' ||
+       channel == 'admin_cache_update' ||
+       channel == 'user_send_error' ||
+       channel == 'news_update'){
         io.sockets.emit(channel, message);
     }
     if(channel == config.prefix + 'show.winners'){

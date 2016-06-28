@@ -46,6 +46,9 @@ var config = {
         endHour: 6
     },
 
+    retryWait: 30, //базовая пауза в секундах между автоматической переотправкой
+    retryMaxCount: 3, //максимальное количество попыток переотправки
+
     loglevel: loglv.LOG,
     admins: [	//steam id админов
         ''
