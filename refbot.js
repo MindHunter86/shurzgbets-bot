@@ -276,10 +276,10 @@ function updateItemsCache() {
             console.tag('SteamRefBot', 'UpdateCache').error('LoadMyInventory error!');
             console.error(err);
             redisClient.set('ref_cache_update',0);
-            redisClient.publish('admin_cache_update',{
+            redisClient.publish('admin_cache_update',JSON.stringify({
                 text: 'Невозможно получить инвентарь бота',
                 type: 'error'
-            });
+            }));
             return;
         }
 
