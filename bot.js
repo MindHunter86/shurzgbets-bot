@@ -597,16 +597,19 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                             return;
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer. ' + err);
-                        setPrizeStatus(game, 2,errorCode);
-                        sendProcceed = false;
-                        if (offerData.retryCount<config.retryMaxCount) {
-                            redisClient.rpush(redisChannels.sendOffersList, newOfferJson);
-                        }
-                        redisClient.publish('user_send_error', JSON.stringify({
-                            steamid: partnerSteamId,
-                            retry: offerData.retryCount,
-                            retryMax: config.retryMaxCount
-                        }));
+                        redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data) {
+
+                            setPrizeStatus(game, 2, errorCode);
+                            sendProcceed = false;
+                            if (offerData.retryCount < config.retryMaxCount) {
+                                redisClient.rpush(redisChannels.sendOffersList, newOfferJson);
+                            }
+                            redisClient.publish('user_send_error', JSON.stringify({
+                                steamid: partnerSteamId,
+                                retry: offerData.retryCount,
+                                retryMax: config.retryMaxCount
+                            }));
+                        });
                         return;
                     }
                     checkArrGlobal = checkArrGlobal.concat(checkArr);
