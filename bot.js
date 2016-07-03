@@ -274,7 +274,7 @@ var parseOffer = function(offer, offerJson) {
             //reWebLogOn(function() {
                 console.tag('SteamBot').error('parseOffer error, ReWebLogon');
                 if(countRetries[offerJson.tradeofferid] > 4) {
-                    console.log(err);
+                    console.log(err.toString());
                     console.tag('SteamBot').error('Error to load inventory');
                     redisClient.multi([
                         ["lrem", redisChannels.usersQueue, 0, offer.steamid_other],
@@ -443,7 +443,7 @@ var sendTradeOfferLottery = function(appId, partnerSteamId, accessToken, sendIte
                     message: message
                 }, function (err, response) {
                     if (err) {
-                        console.tag('SteamBot', 'SendPrizeLottery').log(err);
+                        console.tag('SteamBot', 'SendPrizeLottery').log(err.toString());
                         if((err.toString().indexOf('(50)') != -1) || (err.toString().indexOf('available') != -1) || (err.toString().indexOf('(15)') != -1)) {
                             redisClient.lrem(redisChannels.sendOffersListLottery, 0, offerJson, function(err, data){
                                 //setPrizeStatus(game, 2);
@@ -497,7 +497,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
     d.on('error', function(err) {
         console.error(err.stack);
         console.tag('SteamBot').error('Error to send the bet');
-        setPrizeStatus(game, 2);
+        setPrizeStatus(game, 2, -3);
         sendProcceed = false;
     });
     d.run(function () {
@@ -515,7 +515,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
         }, function (err, items) {
             if(err) {
                 //reWebLogOn(function() {
-                    setPrizeStatus(game, 2);
+                    setPrizeStatus(game, 2, -2);
                     sendProcceed = false;
                 //});
                 console.tag('SteamBot', 'SendPrize').error('LoadMyInventory error ('+err.message+')  Reset offers!');
@@ -578,24 +578,26 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                     message: message
                 }, function (err, response) {
                     if (err) {
-                        console.tag('SteamBot', 'SendPrize').log(err);
+                        console.tag('SteamBot', 'SendPrize').log(err.toString());
+                        var errorCode = 0;
+                        var m = err.toString().match(/\((\d+)\)/);
+                        if (m !== null) {
+                            errorCode = m[1];
+                        }
                         if((err.toString().indexOf('ban') != -1)  || (err.toString().indexOf('(50)') != -1)  || (err.toString().indexOf('(15)') != -1) || (err.toString().indexOf('available') != -1) || (err.toString().indexOf('400') != -1)) {
                             redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
-                                setPrizeStatus(game, 2);
+                                setPrizeStatus(game, 2, errorCode);
                                 sendProcceed = false;
-                                if (offerData.retryCount<config.retryMaxCount) {
-                                    redisClient.rpush(redisChannels.sendOffersList, newOfferJson);
-                                }
                                 redisClient.publish('user_send_error', JSON.stringify({
                                     steamid: partnerSteamId,
-                                    retry: offerData.retryCount,
-                                    retryMax: config.retryMaxCount
+                                    retry: 1,
+                                    retryMax: 1
                                 }));
                             });
                             return;
                         }
                         console.tag('SteamBot', 'SendPrize').error('Error to send offer. ' + err);
-                        setPrizeStatus(game, 2);
+                        setPrizeStatus(game, 2,errorCode);
                         sendProcceed = false;
                         if (offerData.retryCount<config.retryMaxCount) {
                             redisClient.rpush(redisChannels.sendOffersList, newOfferJson);
@@ -620,7 +622,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                 //setPrizeStatus(game, 2);
                 //sendProcceed = false;
                 redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data){
-                    setPrizeStatus(game, 2);
+                    setPrizeStatus(game, 2,-1);
                     sendProcceed = false;
                     if (offerData.retryCount<config.retryMaxCount) {
                         redisClient.rpush(redisChannels.sendOffersList, newOfferJson);
@@ -637,11 +639,14 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
     });
 };
 
-var setPrizeStatus = function(game, status){
+var setPrizeStatus = function(game, status, errorCode){
+    if (typeof errorCode === 'undefined')
+        errorCode = 0;
     requestify.post(config.protocol+'://'+config.domain+'/api/setPrizeStatus', {
         secretKey: config.secretKey,
         game: game,
-        status: status
+        status: status,
+        error: errorCode
     })
         .then(function(response) {
 
@@ -678,7 +683,7 @@ var checkedOffersProcceed = function(offerJson){
                     offers.getItems({tradeId: tradeId}, function (err, items) {
                         if (err) {
                             console.tag('SteamBot').error('Error with getting offered items trade #'+tradeId);
-                            console.tag('SteamBot').error(err);
+                            console.tag('SteamBot').error(err.toString());
                         }
                         var notParsed = false;
                         var itemsOriginal = JSON.stringify(items);
@@ -775,7 +780,7 @@ var declineOffersProcceed = function(offerid){
             declineProcceed = false;
         } else {
             console.tag('SteamBot').error('Error. With decline tradeoffer #' + offer.offerid)
-                .tag('SteamBot').error(err);
+                .tag('SteamBot').error(err.toString());
             declineProcceed = false;
         }
     });
