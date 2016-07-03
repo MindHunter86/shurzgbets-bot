@@ -84,17 +84,11 @@ steamClient.on('logOnResponse', function(logonResp) {
                 });
                 WebSession = true;
                 globalSession = sessionID;
-                redisClient.lrange(redisChannels.tradeoffersList, 0, -1, function(err, offers){
-                    offers.forEach(function(offer) {
-                        checkingOffers.push(offer);
-                    });
-                    handleOffers();
-                });
-                //redisClient.del(redisChannels.itemsToGive);
                 confirmations.setCookies(newCookie);
                 redisClient.del(redisChannels.itemsToSale);
                 confirmations.startConfirmationChecker(10000, config.shopBot.identity_secret);
                 steamBotLogger('Setup Offers!');
+                //handleOffers();
             });
         });
     }
@@ -205,7 +199,7 @@ var sendTradeOffer = function(offerJson){
             contextId: 2
         }, function (err, items) {
             if(err) {
-                console.log(err);
+                console.log(err.toString());
                 console.tag('SteamBotShop', 'SendPrize').log('LoadMyInventory error!');
                 sendProcceed = false;
                 return;
@@ -262,7 +256,7 @@ var sendTradeOffer = function(offerJson){
 
 
 var setItemStatus = function(item, status){
-    requestify.post('https://'+config.domain+'/api/shop/setItemStatus', {
+    requestify.post(config.protocol+'://'+config.domain+'/api/shop/setItemStatus', {
         secretKey: config.secretKey,
         id: item,
         status: status
@@ -275,7 +269,7 @@ var setItemStatus = function(item, status){
 }
 
 var addNewItems = function(){
-    requestify.post('https://'+config.domain+'/api/shop/newItems', {
+    requestify.post(config.protocol+'://'+config.domain+'/api/shop/newItems', {
         secretKey: config.secretKey
     })
         .then(function(response) {
@@ -286,6 +280,7 @@ var addNewItems = function(){
             }
         },function(response){
             console.tag('SteamBotShop').error('Something wrong with newItems. Retry...');
+            console.error(response.body);
             setTimeout(function(){addNewItems()}, 1000);
         });
 }

@@ -165,7 +165,7 @@ var sendTradeOffer = function(offerJson){
                 }, function (err, items) {
                     if(err) {
                         console.tag('SteamRefBot', 'SendItems').error('LoadMyInventory error!');
-                        console.error(err);
+                        console.error(err.toString());
                         sendProcceed = false;
                         return;
                     }
@@ -274,7 +274,7 @@ function updateItemsCache() {
     }, function (err, items) {
         if (err) {
             console.tag('SteamRefBot', 'UpdateCache').error('LoadMyInventory error!');
-            console.error(err);
+            console.error(err.toString());
             redisClient.set('ref_cache_update',0);
             redisClient.publish('admin_cache_update',JSON.stringify({
                 text: 'Невозможно получить инвентарь бота',
