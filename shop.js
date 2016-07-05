@@ -51,7 +51,8 @@ var checkingOffers = [],
 
 const redisChannels = {
     itemsToSale: 'items.to.sale',
-    itemsToGive: 'items.to.give'
+    itemsToGive: 'items.to.give',
+    updateItemsShop: 'newShopItems'
 }
 
 function steamBotLogger(log){
@@ -102,6 +103,36 @@ steamUser.on('updateMachineAuth', function(sentry, callback) {
     callback({ sha_file: getSHA1(sentry.bytes) });
 });
 
+function updateItems() {
+    var itemsForSale = []
+    offers.loadMyInventory({appId: 730, contextId: 2}, function(error, botItems){
+        if(!error){
+            botItems.forEach(function(item){
+                    var tags = [];
+                    var parse = item.tags;
+                    parse.forEach(function(i) {
+                        tags[i.category] = i.name;
+                    });
+
+                    itemsForSale.push({
+                        inventoryId: item.id,
+                        classId: item.classid,
+                        name: item.name,
+                        market_hash_name: item.market_hash_name,
+                        rarity: tags['Rarity'],
+                        quality: tags['Exterior'],
+                        type: tags['Type']
+                    });
+            });
+        }
+        redisClient.rpush(redisChannels.itemsToSale, JSON.stringify(itemsForSale));
+        redisClient.lpop(redisChannels.updateItemsShop, function(err, data) {
+            updateProcceed = false;
+        });
+        return;
+    });
+}
+
 function handleOffers() {
     offers.getOffers({
         get_received_offers: 1,
@@ -119,47 +150,6 @@ function handleOffers() {
                         offers.acceptOffer({
                             tradeOfferId: offer.tradeofferid
                         }, function(error, traderesponse) {
-                            if(!error) {
-                                if ('undefined' != typeof traderesponse.tradeid) {
-                                    offers.getItems({
-                                        tradeId: traderesponse.tradeid
-                                    }, function (error, recieved_items) {
-                                        if (!error) {
-                                            var itemsForParse = [], itemsForSale = [], i = 0;
-                                            recieved_items.forEach(function(item){
-                                                itemsForParse[i++] = item.id;
-                                            })
-                                            offers.loadMyInventory({appId: 730, contextId: 2}, function(error, botItems){
-                                                if(!error){
-                                                    i = 0;
-                                                    botItems.forEach(function(item){
-                                                        if(itemsForParse.indexOf(item.id) != -1){
-                                                            var tags = [];
-                                                            var parse = item.tags;
-                                                            parse.forEach(function(i) {
-                                                                tags[i.category] = i.name;
-                                                            });
-
-                                                            itemsForSale[i++] = {
-                                                                inventoryId: item.id,
-                                                                classId: item.classid,
-                                                                name: item.name,
-                                                                market_hash_name: item.market_hash_name,
-                                                                rarity: tags['Rarity'],
-                                                                quality: tags['Exterior'],
-                                                                type: tags['Type']
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                                redisClient.rpush(redisChannels.itemsToSale, JSON.stringify(itemsForSale));
-                                                return;
-                                            });
-                                        }
-                                        return;
-                                    });
-                                }
-                            }
                             return;
                         });
                     }else{
@@ -277,6 +267,10 @@ var addNewItems = function(){
             console.log(answer);
             if(answer.success){
                 itemsToSaleProcced = false;
+                redisClient.publish('admin_cache_update',JSON.stringify({
+                    text: 'Обновление магазина закончено',
+                    type: 'success'
+                }));
             }
         },function(response){
             console.tag('SteamBotShop').error('Something wrong with newItems. Retry...');
@@ -294,6 +288,13 @@ var queueProceed = function(){
             addNewItems();
         }
     });
+    redisClient.llen(redisChannels.updateItemsShop, function(err, length) {
+        if (length > 0 && !updateProcceed && WebSession) {
+            console.tag('SteamBotShop','Queues').info('Updating shop items');
+            updateProcceed = true;
+            updateItems();
+        }
+    });
     redisClient.llen(redisChannels.itemsToGive, function(err, length) {
         if (length > 0 && !sendProcceed && WebSession) {
             console.tag('SteamBotShop','Queues').info('Send items:' + length);
@@ -306,5 +307,6 @@ var queueProceed = function(){
 }
 var itemsToSaleProcced = false;
 var sendProcceed = false;
+var updateProcceed = false;
 var checkProcceed = false;
 setInterval(queueProceed, 1500);

@@ -578,7 +578,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                     message: message
                 }, function (err, response) {
                     if (err) {
-                        console.tag('SteamBot', 'SendPrize').log(err.toString());
+                        console.tag('SteamBot', 'SendPrize').error('Error to send offer').error(err.toString());
                         var errorCode = 0;
                         var m = err.toString().match(/\((\d+)\)/);
                         if (m !== null) {
@@ -596,7 +596,6 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                             });
                             return;
                         }
-                        console.tag('SteamBot', 'SendPrize').error('Error to send offer. ' + err);
                         redisClient.lrem(redisChannels.sendOffersList, 0, offerJson, function(err, data) {
 
                             setPrizeStatus(game, 2, errorCode);
