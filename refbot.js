@@ -195,6 +195,7 @@ var sendTradeOffer = function(offerJson){
                     message: 'Реферальная награда от '+ config.domain
                 }, function (err, response) {
                     if (err) {
+                        console.error(err.message);
                         getErrorCode(err.message, function(errCode) {
                             if(errCode == 15 || errCode == 25 || err.message.indexOf('an error sending your trade offer.  Please try again later.')) {
                                 redisClient.lrem(redisChannels.itemsToSend, 0, offerJson, function(err, data){
@@ -239,7 +240,7 @@ var setReferalStatus = function(user, status, tradeId, items){
         .then(function(response) {
         },function(response){
             console.tag('SteamRefBot').error('Something wrong with setReferalStatus. Retry...');
-            setTimeout(function(){setReferalStatus()}, 1000);
+            setTimeout(function(){setReferalStatus(user, status, tradeId, items)}, 1000);
         });
 }
 

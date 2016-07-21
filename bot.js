@@ -654,7 +654,7 @@ var setPrizeStatus = function(game, status, errorCode){
 
         },function(response){
             console.tag('SteamBot').error('Something wrong with set prize status. Retry...');
-            setTimeout(function(){setPrizeStatus()}, 1000);
+            setTimeout(function(){setPrizeStatus(game, status, errorCode)}, 1000);
         });
 }
 
