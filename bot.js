@@ -38,10 +38,10 @@ function getSHA1(bytes) {
     return shasum.read();
 }
 // if we've saved a server list, use it
-/*if (fs.existsSync('./config/servers')) {
-    //Steam.servers = JSON.parse(fs.readFileSync('./config/servers'));
+if (fs.existsSync('./config/servers')) {
+    Steam.servers = JSON.parse(fs.readFileSync('./config/servers'));
 }
-*/
+
 var steamClient = new Steam.SteamClient();
 var steamUser = new Steam.SteamUser(steamClient);
 var steamFriends = new Steam.SteamFriends(steamClient);
@@ -58,6 +58,7 @@ const redisChannels = {
     checkItemsList: config.prefix + 'checkItems.list',
     checkList:      config.prefix + 'check.list',
     checkedList:    config.prefix + 'checked.list',
+    parsingList:    config.prefix + 'parsing.list',
     betsList:       config.prefix + 'bets.list',
     sendOffersList: config.prefix + 'send.offers.list',
     sendOffersListLottery: config.prefix + 'send.offers.list.lottery',
@@ -116,7 +117,7 @@ steamClient.on('logOnResponse', function(logonResp) {
 });
 
 steamClient.on('servers', function(servers) {
-    //fs.writeFile('./config/servers', JSON.stringify(servers));
+    fs.writeFile('./config/servers', JSON.stringify(servers));
 });
 steamClient.on('error', function(error) {
     console.error("Steam client error: "+error);
@@ -543,7 +544,7 @@ var sendTradeOffer = function(appId, partnerSteamId, accessToken, sendItems, mes
                         }
                     }
                 }
-                if (itemNotFound) {
+                if (itemNotFound && sendItems[i].assetId>0) {
                     for (var j = 0; j < items.length; j++) {
                         if (items[j].tradable && (items[j].classid == sendItems[i].classid)) {
                             if ((checkArr.indexOf(items[j].id) == -1) && (checkArrGlobal.indexOf(items[j].id) == -1)) {
@@ -669,6 +670,70 @@ var is_checkingOfferExists = function(tradeofferid){
     return false;
 }
 
+var parsingOfferItems = function (offerJson) {
+    var d = domain.create();
+    d.on('error', function(err) {
+        console.tag('SteamBot').error(err.stack);
+    });
+
+    d.run(function () {
+        var offer = JSON.parse(offerJson);
+        if (offer.success) {
+            offers.getOffer({tradeOfferId: offer.offerid}, function (err, body) {
+                if (err) {
+                    console.tag('SteamBot').error('Error with get offer #' + offer.offerid);
+                    console.tag('SteamBot').error(err.toString());
+                    parsingProcceed = false;
+                    return;
+                }
+                var offerCheck = body.response.offer;
+                console.tag('SteamBot').log('Parsing items: #' + offer.tradeId);
+                offers.getItems({tradeId: offerCheck.tradeid}, function (err, items) {
+                    if (err) {
+                        console.tag('SteamBot').error('Error with parsing offered items trade #' + offerCheck.tradeId);
+                        console.tag('SteamBot').error(err.toString());
+                        parsingProcceed = false;
+                        return;
+                    }
+                    var notParsed = false;
+                    var itemsOriginal = JSON.stringify(items);
+                    for (var j = 0; j < offer.items.length; j++) {
+                        var offerItem = offer.items[j];
+                        offer.items[j].assetId = 0;
+                        for (var i = 0; i < items.length; i++) {
+                            if (offerItem.market_hash_name == items[i].market_hash_name) {
+                                offer.items[j].classid = items[i].classid;
+                                offer.items[j].assetId = items[i].id;
+                                items.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (offer.items[j].assetId == 0) {
+                            notParsed = true;
+                        }
+                    }
+                    if (notParsed) {
+                        console.tag('SteamBot').error('Cannot parse offered items, retry');
+                        parsingProcceed = false;
+                    } else {
+                        redisClient.multi([
+                            ["rpush", redisChannels.betsList, JSON.stringify(offer)],
+                            ["lrem", redisChannels.parsingList, 0, offerJson]
+                        ])
+                            .exec(function (err, replies) {
+                                redisClient.lrange(redisChannels.usersQueue, 0, -1, function (err, queues) {
+                                    io.sockets.emit('queue', queues);
+                                    console.tag('SteamBot').notice("New bet Accepted!");
+                                    parsingProcceed = false;
+                                });
+                            });
+                    }
+                });
+            });
+        }
+    });
+}
+
 var checkedOffersProcceed = function(offerJson){
     var d = domain.create();
     d.on('error', function(err) {
@@ -681,92 +746,90 @@ var checkedOffersProcceed = function(offerJson){
             console.tag('SteamBot').log('Procceding accept: #' + offer.offerid);
             offers.acceptOffer({tradeOfferId: offer.offerid}, function (err, body) {
                 if (!err) {
-                    var tradeId = body.tradeid;
-                    offers.getItems({tradeId: tradeId}, function (err, items) {
-                        if (err) {
-                            console.tag('SteamBot').error('Error with getting offered items trade #'+tradeId);
-                            console.tag('SteamBot').error(err.toString());
-                        }
-                        var notParsed = false;
-                        var itemsOriginal = JSON.stringify(items);
-                        for (var j=0;j<offer.items.length;j++) {
-                            var offerItem = offer.items[j];
-                            offer.items[j].assetId = 0;
-                            for (var i = 0; i < items.length; i++) {
-                                if (offerItem.market_hash_name == items[i].market_hash_name) {
-                                    offer.items[j].classid = items[i].classid;
-                                    offer.items[j].assetId = items[i].id;
-                                    items.splice(i, 1);
-                                    break;
-                                }
-                            }
-                            if (offer.items[j].assetId == 0) {
-                                notParsed = true;
-                            }
-                        }
-                        if (notParsed) {
-                            console.tag('SteamBot').error('Cannot parse offered items');
-                            console.tag('SteamBot').error(itemsOriginal);
-                            console.tag('SteamBot').error(offerJson);
-                        }
-                        redisClient.multi([
-                            ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                            ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
-                            ["rpush", redisChannels.betsList, JSON.stringify(offer)],
-                            ["lrem", redisChannels.checkedList, 0, offerJson]
-                        ])
-                            .exec(function (err, replies) {
-                                redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                    io.sockets.emit('queue', queues);
-                                    console.tag('SteamBot').notice("New bet Accepted!");
-                                    checkedProcceed = false;
-                                });
+                    console.notice(body);
+                    offer.tradeId = body.tradeid;
+                    redisClient.multi([
+                        ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
+                        ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
+                        ["rpush", redisChannels.parsingList, JSON.stringify(offer)],
+                        ["lrem", redisChannels.checkedList, 0, offerJson]
+                    ])
+                        .exec(function (err, replies) {
+                            redisClient.lrange(redisChannels.usersQueue, 0, -1, function (err, queues) {
+                                io.sockets.emit('queue', queues);
+                                console.tag('SteamBot').notice("New offer Accepted!");
+                                checkedProcceed = false;
                             });
-                    });
+                        });
                 } else {
                     console.tag('SteamBot').error('Error. With accept tradeoffer #' + offer.offerid)
-                            .tag('SteamBot').error(err.toString()).error(body);
-                    offers.getOffer({tradeOfferId: offer.offerid}, function (err, body){
-                        if(err) {
-                            checkedProcceed = false;
-                            return;
-                        }
-                        if(body.response.offer){
-                            var offerCheck = body.response.offer;
-                            if(offerCheck.trade_offer_state == 2) {
+                        .tag('SteamBot').error(err.toString());
+                    if (err.toString().indexOf('(28)') != -1) {
+                        offers.declineOffer({tradeOfferId: offer.offerid}, function (err, body) {
+                            if (!err) {
+                                console.tag('SteamBot').log('Offer #' + offer.offerid + ' Declined!');
+                                redisClient.multi([
+                                    ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
+                                    ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
+                                    ["lrem", redisChannels.checkedList, 0, offerJson]
+                                ])
+                                    .exec(function (err, replies) {
+                                        redisClient.lrange(redisChannels.usersQueue, 0, -1, function (err, queues) {
+                                            io.sockets.emit('queue', queues);
+                                            checkedProcceed = false;
+                                        });
+                                    });
+                            } else {
+                                console.tag('SteamBot').error('Error. With decline tradeoffer #' + offer.offerid)
+                                    .tag('SteamBot').error(err.toString());
+                                checkedProcceed = false;
+                            }
+
+                        });
+                    } else {
+                        offers.getOffer({tradeOfferId: offer.offerid}, function (err, body) {
+                            if (err) {
                                 checkedProcceed = false;
                                 return;
                             }
-                            if(offerCheck.trade_offer_state == 3){
-                                redisClient.multi([
-                                    ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                                    ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
-                                    ["rpush", redisChannels.betsList, offerJson],
-                                    ["lrem", redisChannels.checkedList, 0, offerJson]
-                                ])
-                                    .exec(function (err, replies) {
-                                        redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                            io.sockets.emit('queue', queues);
-                                            console.tag('SteamBot').log("New bet Accepted (without parsing)!");
-                                            checkedProcceed = false;
+                            if (body.response.offer) {
+                                var offerCheck = body.response.offer;
+                                if (offerCheck.trade_offer_state == 2) {
+                                    checkedProcceed = false;
+                                    return;
+                                }
+                                if (offerCheck.trade_offer_state == 3) {
+                                    offer.tradeId = offerCheck.tradeid;
+                                    redisClient.multi([
+                                        ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
+                                        ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
+                                        ["rpush", redisChannels.parsingList, JSON.stringify(offer)],
+                                        ["lrem", redisChannels.checkedList, 0, offerJson]
+                                    ])
+                                        .exec(function (err, replies) {
+                                            redisClient.lrange(redisChannels.usersQueue, 0, -1, function (err, queues) {
+                                                io.sockets.emit('queue', queues);
+                                                console.tag('SteamBot').log("New offer Accepted!");
+                                                checkedProcceed = false;
+                                            });
                                         });
-                                    });
-                            }else {
-                                redisClient.multi([
-                                    ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
-                                    ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
-                                    ["lrem", redisChannels.checkedList, 0, offerJson]
-                                ])
-                                    .exec(function (err, replies) {
-                                        redisClient.lrange(redisChannels.usersQueue, 0, -1, function(err, queues) {
-                                            io.sockets.emit('queue', queues);
- 
-                                            checkedProcceed = false;
+                                } else {
+                                    redisClient.multi([
+                                        ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
+                                        ["lrem", redisChannels.usersQueue, 0, offer.steamid64],
+                                        ["lrem", redisChannels.checkedList, 0, offerJson]
+                                    ])
+                                        .exec(function (err, replies) {
+                                            redisClient.lrange(redisChannels.usersQueue, 0, -1, function (err, queues) {
+                                                io.sockets.emit('queue', queues);
+
+                                                checkedProcceed = false;
+                                            });
                                         });
-                                    });
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
                 }
             });
         }
@@ -802,6 +865,15 @@ var queueProceed = function() {
             checkedProcceed = true;
             redisClient.lindex(redisChannels.checkedList, 0,function (err, offer) {
                 checkedOffersProcceed(offer);
+            });
+        }
+    });
+    redisClient.llen(redisChannels.parsingList, function(err, length) {
+        if(length > 0 && !parsingProcceed && WebSession) {
+            console.tag('SteamBot','Queues').info('ParsingOffers:' + length);
+            parsingProcceed = true;
+            redisClient.lindex(redisChannels.parsingList, 0,function (err, offer) {
+                parsingOfferItems(offer);
             });
         }
     });
@@ -856,6 +928,7 @@ var queueProceed = function() {
 var parseItemsProcceed = false;
 var checkProcceed = false;
 var checkedProcceed = false;
+var parsingProcceed = false;
 var declineProcceed = false;
 var betsProcceed = false;
 var sendProcceed = false;
