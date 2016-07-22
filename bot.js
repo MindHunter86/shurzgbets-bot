@@ -768,6 +768,10 @@ var checkedOffersProcceed = function(offerJson){
                         offers.declineOffer({tradeOfferId: offer.offerid}, function (err, body) {
                             if (!err) {
                                 console.tag('SteamBot').log('Offer #' + offer.offerid + ' Declined!');
+                                io.sockets.emit('depositDecline', JSON.stringify({
+                                    user: offer.steamid64,
+                                    msg: 'Невозможно принять трейд из-за ошибки Steam. Отправьте скины повторно'
+                                }));
                                 redisClient.multi([
                                     ["lrem", redisChannels.tradeoffersList, 0, offer.offerid],
                                     ["lrem", redisChannels.usersQueue, 0, offer.steamid64],

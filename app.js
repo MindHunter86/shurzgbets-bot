@@ -126,6 +126,8 @@ setInterval(checkLastGame, 30000);
 setInterval(updateOnline, 5000);
 
 function checkLastGame() {
+    if (game.status>0)
+        return;
     var currentTime = Date.now();
     if (currentTime-lastGameTimestamp >= config.maxIntervalBetweenGames*60*1000) {
         if (config.notifyURL && config.notifyURL.length && !isNotifyMuted()) {
