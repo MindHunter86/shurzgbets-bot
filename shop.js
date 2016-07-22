@@ -254,7 +254,7 @@ var setItemStatus = function(item, status){
         .then(function(response) {
         },function(response){
             console.tag('SteamBotShop').error('Something wrong with setItemStatus. Retry...');
-            setTimeout(function(){setItemStatus()}, 1000);
+            setTimeout(function(){setItemStatus(item, status)}, 1000);
         });
 }
 
